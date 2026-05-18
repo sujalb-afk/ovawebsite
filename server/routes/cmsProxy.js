@@ -26,6 +26,8 @@ router.get('/status', (_req, res) => {
   res.json({
     enabled: isCmsEnabled(),
     cmsBase: process.env.OVA_CMS_API_URL || null,
+    cmsLocalFallback: process.env.OVA_CMS_LOCAL_URL || 'http://localhost:5000',
+    ovaWebApi: `http://localhost:${process.env.PORT || 5004}`,
     cacheSeconds: Number(process.env.OVA_CMS_CONTENT_CACHE_SECONDS ?? 10),
   });
 });
@@ -67,10 +69,11 @@ router.get('/global', async (_req, res) => {
 router.get('/events', async (_req, res) => {
   noStoreJson(res);
   const events = await fetchCmsEvents();
+  const list = Array.isArray(events) ? events : [];
   res.json({
-    ok: Boolean(events),
-    fromCms: Boolean(events),
-    events: events || [],
+    ok: events !== null,
+    fromCms: events !== null,
+    events: list,
   });
 });
 

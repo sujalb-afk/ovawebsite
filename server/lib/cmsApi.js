@@ -4,8 +4,32 @@
  */
 
 const CMS_BASE = (process.env.OVA_CMS_API_URL || '').replace(/\/$/, '');
+/** Dev fallback when ngrok is offline — CMS-OVA `npm run dev` on :5000 */
+const CMS_LOCAL = (process.env.OVA_CMS_LOCAL_URL || 'http://localhost:5000').replace(/\/$/, '');
 const CMS_ENABLED = process.env.OVA_CMS_CONTENT_ENABLED === 'true';
 const CACHE_SECONDS = Number(process.env.OVA_CMS_CONTENT_CACHE_SECONDS ?? 10);
+
+function getCmsFetchBases() {
+  const bases = [];
+  if (CMS_BASE) bases.push(CMS_BASE);
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    CMS_LOCAL &&
+    !bases.includes(CMS_LOCAL)
+  ) {
+    bases.push(CMS_LOCAL);
+  }
+  // Dev: local CMS (:5000) first — ngrok often 404s when tunnel is not pointed at CMS-OVA
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    CMS_LOCAL &&
+    bases.includes(CMS_LOCAL) &&
+    process.env.OVA_CMS_PREFER_LOCAL !== 'false'
+  ) {
+    return [CMS_LOCAL, ...bases.filter((b) => b !== CMS_LOCAL)];
+  }
+  return bases;
+}
 
 const memoryCache = new Map();
 /** Last successful CMS response — kept when live fetch fails so reloads do not fall back to static. */
@@ -44,17 +68,16 @@ function isCmsEnabled() {
   return CMS_ENABLED && Boolean(CMS_BASE);
 }
 
-function buildPublicUrl(path) {
+function buildPublicUrl(base, path) {
   const p = path.startsWith('/') ? path : `/${path}`;
   const hasLocale = p.includes('locale=');
   const suffix = hasLocale ? '' : `${p.includes('?') ? '&' : '?'}locale=en`;
-  return `${CMS_BASE}/api/public${p}${suffix}`;
+  return `${base}/api/public${p}${suffix}`;
 }
 
-async function fetchCms(path, init = {}) {
-  if (!isCmsEnabled()) return null;
+const CMS_FETCH_TIMEOUT_MS = Number(process.env.OVA_CMS_FETCH_TIMEOUT_MS ?? 12000);
 
-  const url = buildPublicUrl(path);
+async function fetchCmsOnce(url, path, init = {}) {
   const key = cacheKey(url);
   const fresh = getFreshCached(key);
   if (fresh !== undefined) return fresh;
@@ -62,6 +85,7 @@ async function fetchCms(path, init = {}) {
   try {
     const res = await fetch(url, {
       ...init,
+      signal: AbortSignal.timeout(CMS_FETCH_TIMEOUT_MS),
       headers: {
         Accept: 'application/json',
         'ngrok-skip-browser-warning': '1',
@@ -118,6 +142,29 @@ async function fetchCms(path, init = {}) {
   }
 }
 
+async function fetchCms(path, init = {}) {
+  if (!isCmsEnabled()) return null;
+
+  const bases = getCmsFetchBases();
+  let fallbackStale = null;
+
+  for (let i = 0; i < bases.length; i += 1) {
+    const base = bases[i];
+    const url = buildPublicUrl(base, path);
+    const json = await fetchCmsOnce(url, path, init);
+    if (json) {
+      if (i > 0 && process.env.NODE_ENV !== 'production') {
+        console.log(`[CMS] OK via local fallback ${base}`);
+      }
+      return json;
+    }
+    const stale = staleCache.get(cacheKey(url));
+    if (stale !== undefined) fallbackStale = markStale(stale);
+  }
+
+  return fallbackStale;
+}
+
 async function fetchCmsPage(slug) {
   const data = await fetchCms(`/content/${slug}?locale=en`);
   if (!data?.page) return null;
@@ -153,16 +200,29 @@ async function fetchCmsServices() {
 }
 
 async function fetchCmsHealth() {
-  if (!CMS_BASE) return { ok: false, enabled: false, message: 'OVA_CMS_API_URL not set' };
-  try {
-    const res = await fetch(`${CMS_BASE}/api/health`, {
-      headers: { Accept: 'application/json', 'ngrok-skip-browser-warning': '1' },
-    });
-    const json = res.ok ? await res.json() : null;
-    return { ok: res.ok, enabled: CMS_ENABLED, db: json?.db, cmsBase: CMS_BASE };
-  } catch (err) {
-    return { ok: false, enabled: CMS_ENABLED, message: err.message };
+  if (!CMS_BASE && !CMS_LOCAL) {
+    return { ok: false, enabled: false, message: 'OVA_CMS_API_URL not set' };
   }
+  for (const base of getCmsFetchBases()) {
+    try {
+      const res = await fetch(`${base}/api/health`, {
+        headers: { Accept: 'application/json', 'ngrok-skip-browser-warning': '1' },
+      });
+      const json = res.ok ? await res.json() : null;
+      if (res.ok) {
+        return {
+          ok: true,
+          enabled: CMS_ENABLED,
+          db: json?.db,
+          cmsBase: base,
+          configuredBase: CMS_BASE || null,
+        };
+      }
+    } catch {
+      /* try next base */
+    }
+  }
+  return { ok: false, enabled: CMS_ENABLED, message: 'CMS unreachable (ngrok and local :5000)' };
 }
 
 module.exports = {

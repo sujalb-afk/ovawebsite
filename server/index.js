@@ -169,6 +169,12 @@ function startServer(withoutMongo = false) {
         ? `Server running on http://0.0.0.0:${PORT} (without MongoDB — start MongoDB to load form data)`
         : `Server running on http://0.0.0.0:${PORT}`
     );
+    if (process.env.OVA_CMS_CONTENT_ENABLED === 'true') {
+      const local = process.env.OVA_CMS_LOCAL_URL || 'http://localhost:5000';
+      console.log(
+        `[CMS] Proxy /api/cms/* → ${process.env.OVA_CMS_API_URL || '(unset)'} (dev fallback: ${local})`
+      );
+    }
     verifySmtpConnectionAsync().catch(() => {});
   });
 }

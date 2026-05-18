@@ -121,17 +121,17 @@ const EVENTS_PAGE_DEFAULTS = {
 
 function Events() {
   const { data: cmsData, seo: cmsSeo, fromCms } = useCmsPage('events');
-  const { events: cmsEvents } = useCmsEvents();
+  const { events: cmsEvents, fromCms: eventsFromCms } = useCmsEvents();
   const pageCopy = useMemo(
     () => (fromCms && cmsData ? normalizeEventsPageCopy(cmsData, EVENTS_PAGE_DEFAULTS) : EVENTS_PAGE_DEFAULTS),
     [cmsData, fromCms]
   );
   const events = useMemo(() => {
-    if (cmsEvents?.length) {
+    if (eventsFromCms && Array.isArray(cmsEvents)) {
       return cmsEvents.map(mapCmsEventToCard);
     }
     return EVENTS;
-  }, [cmsEvents]);
+  }, [cmsEvents, eventsFromCms]);
   const heroTitleParts = pageCopy.heroHeading.includes('Events')
     ? <>Our <em>Events</em></>
     : pageCopy.heroHeading;

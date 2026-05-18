@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const apiTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:5000';
+  // OVA Web backend (CMS proxy /api/cms/*). CMS-OVA runs on :5000 — do not proxy there.
+  const apiTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:5004';
 
   return {
   plugins: [react()],
