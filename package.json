@@ -1,0 +1,48 @@
+{
+  "name": "ova-ngo-clone",
+  "version": "1.0.0",
+  "description": "OVA - Bharatiya Open Volunteer Association Website Clone (MERN Stack)",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "nodemon server/index.js",
+    "dev:api": "nodemon server/index.js",
+    "dev:server": "node server/index.js",
+    "dev:cms-stack": "concurrently -n cms,api,web -c blue,green,magenta \"npm run dev:cms\" \"npm run server\" \"npm run client\"",
+    "dev:cms": "cd ../../CMS-OVA/server && npm run dev",
+    "client": "cd client && npm start",
+    "install-all": "npm install && cd client && npm install",
+    "build": "npm run optimize-images && cd client && npm run build",
+    "optimize-images": "node scripts/optimize-images.js",
+    "arrange-images": "node scripts/arrange-public-images.js",
+    "arrange-root-images": "node scripts/arrange-root-images.js"
+  },
+  "keywords": [
+    "ova",
+    "ngo",
+    "volunteer",
+    "mern"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "mongodb": "^7.2.0",
+    "mongoose": "^8.24.0",
+    "nodemailer": "^6.9.8",
+    "pdf-lib": "^1.17.1",
+    "pdfkit": "^0.15.2",
+    "puppeteer": "^23.11.1",
+    "qrcode": "^1.5.4",
+    "razorpay": "^2.9.6"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.0.2",
+    "sharp": "^0.33.5"
+  }
+}

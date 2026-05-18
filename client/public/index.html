@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preload" as="image" href="%PUBLIC_URL%/images/hero/herobg3.webp" fetchpriority="high">
+    <!-- Preload LCP font (DM Sans) so h1.hero-redesign-title is not delayed -->
+    <link rel="preload" href="https://fonts.gstatic.com/s/dmsans/v17/rP2Hp2ywxg089UriCZOIHQ.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://fonts.gstatic.com/s/dmsans/v17/rP2Hp2ywxg089UriCZ2IHSeH.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="icon" type="image/png" sizes="64x64" href="%PUBLIC_URL%/images/favicons/favicon-64.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="%PUBLIC_URL%/images/favicons/favicon-192.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="%PUBLIC_URL%/images/favicons/favicon-192.png" />
+    <link rel="canonical" href="https://ova.ngo/" />
+    <meta name="google-site-verification" content="N8QTZ8VW5JTabKMZ9df8tJyuoxVGXx4LceYtboy7ZB8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#198754" />
+    <!-- Reduces console noise from Razorpay/Sentry requesting sensor permissions -->
+    <meta http-equiv="Permissions-Policy" content="accelerometer=(self), gyroscope=(self)" />
+    <!-- Primary meta -->
+    <meta name="description" content="OVA™ — Open Volunteer Association. Empowering communities across India through sustainability, job readiness, social services, tech literacy, and mental health support. Volunteer or donate today." />
+    <meta name="keywords" content="OVA™, Open Volunteer Association, Volunteer India, NGO India, donate, social impact, sustainability, job readiness, mental health, community" />
+    <meta name="author" content="Open Volunteer Association (OVA™)" />
+
+    <!-- Open Graph / social sharing -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ova.ngo/" />
+    <meta property="og:title" content="OVA™ | Open Volunteer Association — Empowering Communities" />
+    <meta property="og:description" content="Join OVA™ in building a better India. Volunteer, donate, and help us drive real change across education, environment, health, and livelihoods." />
+    <meta property="og:image" content="%PUBLIC_URL%/images/ova-logo.webp" />
+
+    <!-- Twitter card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="OVA™ | Open Volunteer Association" />
+    <meta name="twitter:description" content="Empowering communities across India — sustainability, job readiness, social services, tech literacy, and mental health support." />
+    <meta name="twitter:image" content="%PUBLIC_URL%/images/ova-logo.webp" />
+
+    <title>OVA™ | Open Volunteer Association — Empowering Communities</title>
+    <!-- Google Fonts: non-blocking load (FIX 2 — saves ~1,090ms render blocking) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Google Fonts: 400,600,700 only; font-display=swap to prevent layout shift -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"></noscript>
+    <!-- Critical above-the-fold CSS: navbar + hero LCP + footer reserve (CLS < 0.1) -->
+    <style>
+      @font-face{font-family:"DM Sans Fallback";src:local("Arial");size-adjust:105.39%;ascent-override:94.13%;descent-override:29.54%;line-gap-override:0%}
+      :root{--text-h1:clamp(2.5rem,5vw,3.5rem);--leading-heading-tight:1.2}
+      .navbar-ova-updated{position:fixed;top:0;left:0;right:0;width:100%;background:#fff;border-bottom:1px solid #e8f0eb;box-shadow:0 2px 20px rgba(0,0,0,.05);z-index:9999}
+      .navbar-ova-updated.navbar-on-hero{background:transparent;border-bottom-color:transparent;box-shadow:none}
+      .navbar-ova-updated-container{display:flex;align-items:center;justify-content:space-between;height:72px;max-width:min(1280px,100%);width:100%;margin:0 auto;box-sizing:border-box;padding:0 24px}
+      .navbar-brand-updated{display:flex;align-items:center;justify-content:center;flex-shrink:0;height:90px;margin:0;padding:0}
+      .navbar-logo-ova{width:90px;height:90px;max-width:90px;object-fit:contain;display:block;max-height:90px}
+      .hero-section.hero-redesign{position:relative;min-height:100vh;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:68px;color:#fff;background:none;overflow:hidden}
+      .hero-redesign-container{position:relative;z-index:2;flex:1;display:flex;align-items:center;justify-content:center;width:100%;padding-top:0}
+      .hero-redesign-content{max-width:760px;font-family:"DM Sans","DM Sans Fallback",sans-serif;text-align:center;margin:0 auto}
+      .hero-redesign-title{font-family:"DM Sans","DM Sans Fallback",sans-serif;font-weight:700;font-size:var(--text-h1);line-height:var(--leading-heading-tight);letter-spacing:-.02em;margin-bottom:1.25rem;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.4);min-height:1.2em}
+      .hero-redesign-subtext{font-family:"DM Sans","DM Sans Fallback",sans-serif;min-height:1.65em}
+      .hero-redesign-bg,.hero-redesign-slide{contain:layout paint}
+      .hero-redesign-slide-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+      .hero-title-highlight{font-style:italic}
+      .footer-ova{min-height:320px;contain:layout;content-visibility:auto;contain-intrinsic-size:auto 450px}
+      .footer-main{min-height:220px}
+      .footer-bottom{min-height:100px}
+      .footer-bottom-inner{min-height:80px}
+      .footer-social-icon{width:40px;height:40px;min-width:40px;min-height:40px;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box}
+      .footer-contact-list li .bi{width:1rem;height:1rem;display:inline-block;flex-shrink:0}
+      .about-hero{position:relative;min-height:52vh;overflow:hidden}
+      .about-hero-bg{position:absolute;inset:0;z-index:0;background-image:url(/images/about-hero-bg-silhouettes.webp);background-size:cover;background-position:center;background-repeat:no-repeat}
+    </style>
+    <!-- Bootstrap + Bootstrap Icons self-hosted via index.js -->
+    <!-- reCAPTCHA loaded on demand when Contact page opens (see utils/recaptchaLoader.js) -->
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>

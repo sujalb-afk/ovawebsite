@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Donation Receipt - OVA™</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      color: #111;
+      line-height: 1.4;
+    }
+    .receipt {
+      max-width: 21cm;
+      margin: 0 auto;
+      border: 3px solid #1a5f4a;
+      padding: 20px;
+      min-height: 29.7cm;
+    }
+    .header {
+      border-bottom: 1px solid #333;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .org-name {
+      font-size: 16px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0 0 4px 0;
+    }
+    .tagline {
+      font-size: 11px;
+      font-style: italic;
+      color: #1a5f4a;
+      margin: 0 0 8px 0;
+    }
+    .org-details {
+      font-size: 9px;
+      color: #333;
+      margin: 0;
+    }
+    .org-details p { margin: 2px 0; }
+    .title {
+      font-size: 14px;
+      font-weight: bold;
+      text-decoration: underline;
+      text-align: center;
+      margin: 0 0 16px 0;
+    }
+    .row {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      gap: 12px;
+    }
+    .row.receipt-date { margin-bottom: 14px; }
+    .label {
+      flex: 0 0 180px;
+      font-weight: 500;
+    }
+    .value {
+      flex: 1;
+      min-width: 0;
+      word-break: break-word;
+    }
+    .value.receipt-no { color: #c00; font-weight: 600; }
+    .receipt-date .value:last-child { margin-left: auto; text-align: right; }
+    .footer {
+      margin-top: 28px;
+      padding-top: 12px;
+      border-top: 1px solid #ccc;
+      font-size: 9px;
+      color: #444;
+    }
+    .footer ul { margin: 0; padding-left: 18px; }
+    .footer li { margin-bottom: 4px; }
+    .thanks {
+      text-align: center;
+      font-weight: bold;
+      font-style: italic;
+      margin: 16px 0 0 0;
+      font-size: 11px;
+    }
+    .signature {
+      text-align: right;
+      margin-top: 12px;
+      font-size: 10px;
+    }
+    .signature .name { font-weight: 500; }
+    .signature .role { font-size: 9px; color: #555; }
+  </style>
+</head>
+<body>
+  <div class="receipt">
+    <div class="header">
+      <h1 class="org-name">Bharatiya Open Volunteer Association (OVA<sup>TM</sup>)</h1>
+      <p class="tagline">— Connecting Minds, Empowering Lives! —</p>
+      <div class="org-details">
+        <p>(A Section 8 Company registered with the Ministry of Corporate Affairs (MCA), Government of India – Not for Profit)</p>
+        <p>H N 1579/2, Chavan-Dafale colony, Landmark- MSEB office, Uchgaon, Kolhapur, Maharashtra 416005</p>
+        <p>CIN: U88900PN2024NPL231896 | NGO Darpan ID: MH/2024/0427714 | PAN: AAMCB6864G</p>
+      </div>
+    </div>
+
+    <h2 class="title">Donation Receipt</h2>
+
+    <div class="row receipt-date">
+      <span class="label">Receipt No :</span>
+      <span class="value receipt-no">{{receiptNo}}</span>
+      <span class="label">Date :</span>
+      <span class="value">{{date}}</span>
+    </div>
+
+    <div class="row">
+      <span class="label">Received With Thanks From :</span>
+      <span class="value">{{donorName}}</span>
+    </div>
+    <div class="row">
+      <span class="label">Address :</span>
+      <span class="value">{{donorAddress}}</span>
+    </div>
+    <div class="row">
+      <span class="label">Mobile Number :</span>
+      <span class="value">{{donorMobile}}</span>
+    </div>
+    <div class="row">
+      <span class="label">Email ID :</span>
+      <span class="value">{{donorEmail}}</span>
+    </div>
+    <div class="row">
+      <span class="label">Purpose of Donation :</span>
+      <span class="value">{{purpose}}</span>
+    </div>
+    <div class="row">
+      <span class="label">Mode of Donation :</span>
+      <span class="value">{{mode}}</span>
+    </div>
+    <div class="row">
+      <span class="label">Date of Donation :</span>
+      <span class="value">{{donationDate}}</span>
+    </div>
+    <div class="row">
+      <span class="label">Amount of Donation :</span>
+      <span class="value">₹ {{amount}}</span>
+    </div>
+    <div class="row">
+      <span class="label">Amount of Donation (In words) :</span>
+      <span class="value">{{amountWords}}</span>
+    </div>
+
+    <div class="footer">
+      <ul>
+        <li>50% of Voluntary Contribution, for the purpose of, Bharatiya Open Volunteer Association (OVA<sup>TM</sup>) is eligible for deduction under sec 80G(2)(b) of the Income Tax Act, 1961.</li>
+        <li>Cash Donation in excess of Rs. 2,000 is not eligible for deduction under section 80G.</li>
+        <li>Contact us on: donation@ova.ngo, Contact number: +91 90194 80550, Website: https://www.ova.ngo</li>
+      </ul>
+      <p class="thanks">Thank you for supporting our mission with your generous donation!</p>
+      <div class="signature">
+        <div class="name">Rajendra Sadashiv Dure</div>
+        <div class="role">(Director)</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

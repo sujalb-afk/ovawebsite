@@ -1,0 +1,36 @@
+/** Postbuild: purge unused CSS from build output (Bootstrap + any unused Tailwind). Run from client/. */
+module.exports = {
+  content: [
+    'public/index.html',
+    'index.html',
+    'src/**/*.{js,jsx,ts,tsx,html}',
+    'build/index.html',
+    'build/static/js/*.js',
+    'build/assets/*.js',
+  ],
+  css: ['build/static/css/*.css', 'build/assets/*.css'],
+  output: 'build/assets',
+  safelist: {
+    greedy: [
+      /^hero-/,
+      /^modal/,
+      /^dropdown/,
+      /^collapse/,
+      /^show$/,
+      /^fade$/,
+      /^active$/,
+      /^spinner/,
+      /^visually-hidden/,
+      /^bi$/,
+      /^nav-/,
+      /^navbar/,
+      /^form-control/,
+      /^form-select/,
+      /^form-label/,
+      /^alert/,
+      /^footer-/,
+    ],
+  },
+  fontFace: true,
+  keyframes: true,
+};

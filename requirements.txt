@@ -1,0 +1,26 @@
+# OVA NGO - MERN Stack Project Dependencies
+# ===========================================
+# For Node.js: Run "npm install" in project root and "npm install" in client/
+# This file documents all required packages for reference.
+
+# Backend (server/) - npm install in D:\ova
+express>=4.18.2
+cors>=2.8.5
+mongoose>=8.0.3
+dotenv>=16.3.1
+
+# Frontend (client/) - npm install in D:\ova\client
+react>=18.2.0
+react-dom>=18.2.0
+react-router-dom>=6.21.0
+react-scripts>=5.0.1
+axios>=1.6.2
+react-helmet-async>=2.0.4
+
+# Dev Dependencies (root)
+concurrently>=8.2.2
+nodemon>=3.0.2
+
+# Runtime Requirements
+node>=16.0.0
+mongodb>=6.0.0 (or MongoDB Atlas connection string)

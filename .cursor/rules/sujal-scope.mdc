@@ -1,0 +1,25 @@
+---
+description: Restrict changes to sujal branch and only Home, About Us, Services, Events pages
+alwaysApply: true
+---
+
+# Branch and page scope (OVA project)
+
+- **Branch:** Apply changes only on the `sujal` branch. Do not assume or target other branches unless the user explicitly asks.
+- **Pages in scope:** Only modify or add features for these four pages:
+  - **Home** (`client/src/pages/Home.js`)
+  - **About Us** (`client/src/pages/About.js`)
+  - **Services** (`client/src/pages/Services.js`)
+  - **Events** (`client/src/pages/Events.js`)
+
+Do **not** change logic, content, or structure of: Gallery, Join, Contact, Team, Donate (unless the user explicitly asks for those pages).
+
+Shared UI used by the four pages (e.g. Navbar, Footer, App routing, global styles) may be updated when the change is required for Home, About Us, Services, or Events to work correctly.
+
+**OVA’s four objectives** (content and messaging should reflect these):
+1. Sustainability awareness and mitigation
+2. AI awareness and training
+3. Job Readiness Programs
+4. Charity services to the underprivileged rural students
+
+**Design guidance:** When changing copy, layout, or structure on the four pages, follow the project design guide at `docs/OVA_WEBSITE_DESIGN_GUIDE.md` so the site looks and reads like a clear, trustworthy NGO site for these focus areas.

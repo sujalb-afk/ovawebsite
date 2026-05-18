@@ -1,0 +1,8 @@
+# OVA - Bharatiya Open Volunteer Association
+User-agent: *
+Allow: /
+
+# Sitemap location (update with your production URL)
+Sitemap: https://ova.ngo/sitemap.xml
+
+# Crawl-delay: 1 (optional - uncomment to limit crawl rate for small servers)

@@ -1,0 +1,19 @@
+
+node_modules/
+client/node_modules/
+client/build/
+
+server/receipts/
+.DS_Store
+*.log
+npm-debug.log*
+.cursor/mcp.json
+mcp.json
+
+# Secrets — never commit
+.env
+server/.env
+client/.env
+client/.env.development
+client/.env.production
+client/.env.local
