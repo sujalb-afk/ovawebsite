@@ -1,9 +1,10 @@
 import React, { useState } from "react";
+import { cmsImageUrl } from "../utils/imageUrl";
 
 // Root-relative path so image works with any origin (dev, production, serve -s build)
 const basePath = (import.meta.env.BASE_URL || "").replace(/\/$/, "");
-const HERO_BG_IMAGE = `${basePath}/images/about-hero-bg-silhouettes.webp`;
-const HERO_BG_FALLBACK = `${basePath}/images/about-hero-bg.webp`;
+const HERO_BG_IMAGE = cmsImageUrl(`${basePath}/images/about-hero-bg-silhouettes.webp`);
+const HERO_BG_FALLBACK = cmsImageUrl(`${basePath}/images/about-hero-bg.webp`);
 
 /**
  * Hero background for About, Services, Events, Team, Contact, Donate, Join, etc.
@@ -21,7 +22,7 @@ function AboutHeroBg({ className = "" }) {
     }
   };
 
-  const bgImageUrl = `${basePath}/images/about-hero-bg-silhouettes.webp`;
+  const bgImageUrl = cmsImageUrl(`${basePath}/images/about-hero-bg-silhouettes.webp`);
   return (
     <div
       className={`about-hero-bg ${className}`.trim()}

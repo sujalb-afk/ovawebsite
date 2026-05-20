@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import OvaBrand from './OvaBrand';
+import { useCmsGlobal } from '../hooks/useCms';
 
 const SOCIAL = [
   { icon: 'bi-facebook',  href: 'http://facebook.com/OpenVolunteerAssociation/',                          label: 'Facebook'   },
@@ -27,6 +28,13 @@ const Footer = React.memo(function Footer() {
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
+
+  const { global: cmsGlobal, fromCms } = useCmsGlobal();
+  const address = fromCms && cmsGlobal?.address ? cmsGlobal.address : 'Chavan-dafale colony, Uchgaon,\nKolhapur, Maharashtra 416005';
+  const phone = fromCms && cmsGlobal?.phone ? cmsGlobal.phone : '+91 8080677811';
+  const emailAddr = fromCms && cmsGlobal?.email ? cmsGlobal.email : 'support@ova.ngo';
+  const aboutText = fromCms && cmsGlobal?.footerAbout ? cmsGlobal.footerAbout : 'is an NGO that uses technology to support volunteerism and community work. We run programs on sustainability, job readiness, and digital literacy.';
+  const socials = fromCms && cmsGlobal?.socials ? cmsGlobal.socials : SOCIAL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,7 +71,7 @@ const Footer = React.memo(function Footer() {
             </Link>
           </h5>
           <p className="footer-about-text">
-            <OvaBrand /> is an NGO that uses technology to support volunteerism and community work. We run programs on sustainability, job readiness, and digital literacy.
+            <OvaBrand /> {aboutText}
           </p>
           <div className="footer-legal-links footer-legal-links-below-about">
             <Link to="/terms">Terms &amp; Conditions</Link>
@@ -78,28 +86,28 @@ const Footer = React.memo(function Footer() {
           <ul className="footer-contact-list">
             <li>
               <i className="bi bi-geo-alt" aria-hidden="true" />
-              <span>Chavan-dafale colony, Uchgaon,<br />Kolhapur, Maharashtra 416005</span>
+              <span style={{ whiteSpace: 'pre-line' }}>{address}</span>
             </li>
             <li>
               <i className="bi bi-telephone" aria-hidden="true" />
-              <a href="tel:+918080677811">+91 8080677811</a>
+              <a href={`tel:${phone.replace(/[^\d+]/g, '')}`}>{phone}</a>
             </li>
             <li>
               <i className="bi bi-envelope" aria-hidden="true" />
-              <a href="mailto:support@ova.ngo">support@ova.ngo</a>
+              <a href={`mailto:${emailAddr}`}>{emailAddr}</a>
             </li>
           </ul>
           <div className="footer-socials footer-socials-below-contact">
-            {SOCIAL.map((s) => (
+            {socials.map((s) => (
               <a
-                key={s.label}
+                key={s.label || s.href}
                 href={s.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={s.label}
+                aria-label={s.label || 'Social'}
                 className="footer-social-icon"
               >
-                <i className={`bi ${s.icon}`} aria-hidden="true" />
+                <i className={`bi ${s.icon || 'bi-globe'}`} aria-hidden="true" />
               </a>
             ))}
           </div>

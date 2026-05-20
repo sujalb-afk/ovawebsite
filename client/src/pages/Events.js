@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import AboutHeroBg from '../components/AboutHeroBg';
-import { getOptimizedImageUrl } from '../utils/imageUrl';
+import { getOptimizedImageUrl, cmsImageUrl } from '../utils/imageUrl';
 import { useCmsPage, useCmsEvents } from '../hooks/useCms';
 import { mapCmsEventToCard, normalizeEventsPageCopy } from '../utils/cmsMappers';
 import { stripHtml } from '../utils/cmsHtml';
@@ -175,7 +175,7 @@ function Events() {
               <article key={ev.id} className="ev-card-v">
                 <div className="ev-card-v-img-wrap">
                   {ev.image ? (
-                    <img src={getOptimizedImageUrl(ev.image)} alt={ev.title} className="ev-card-v-img" width={400} height={300} loading="lazy" decoding="async" />
+                    <img src={getOptimizedImageUrl(cmsImageUrl(ev.image))} alt={ev.title} className="ev-card-v-img" width={400} height={300} loading="lazy" decoding="async" />
                   ) : (
                     <div className="ev-card-v-placeholder" aria-label="Image coming soon">
                       <i className="bi bi-camera ev-card-v-placeholder-icon" aria-hidden="true" />

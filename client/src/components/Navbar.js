@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link, useLocation } from 'react-router-dom';
+import { useCmsGlobal } from '../hooks/useCms';
+import { cmsImageUrl } from '../utils/imageUrl';
 
 const HERO_SCROLL_THRESHOLD = 80;
 
@@ -27,7 +30,19 @@ const PUBLIC_URL = (import.meta.env.BASE_URL || '').replace(/\/$/, '');
 const OVA_CONNECT_URL = 'https://connect.ova.ngo/';
 
 /* Transparent navbar (on hero) → ovalogo1; white navbar → ovalogo2. */
-function getLogoUrls(onHero) {
+function getLogoUrls(onHero, cmsGlobal = null) {
+  if (cmsGlobal && cmsGlobal.site_settings) {
+    const settings = cmsGlobal.site_settings;
+    if (onHero && settings.logo_secondary) {
+      const src = cmsImageUrl(settings.logo_secondary);
+      return { src, srcSet: undefined, sizes: undefined, fallback: src };
+    }
+    if (!onHero && settings.logo_primary) {
+      const src = cmsImageUrl(settings.logo_primary);
+      return { src, srcSet: undefined, sizes: undefined, fallback: src };
+    }
+  }
+
   const base = `${PUBLIC_URL}/images`;
   const name = onHero ? 'ovalogo1' : 'ovalogo2';
   return {
@@ -44,6 +59,7 @@ function Navbar() {
   const [onHero, setOnHero] = useState(false);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT);
   const location = useLocation();
+  const { global: cmsGlobal, fromCms } = useCmsGlobal();
 
   const isHome = location.pathname === '/';
   const isDonatePage = location.pathname === '/donate';
@@ -90,9 +106,18 @@ function Navbar() {
     }
   }, [isOpen]);
 
+  const favicon = cmsGlobal?.site_settings?.favicon ? cmsImageUrl(cmsGlobal.site_settings.favicon) : null;
+
   return (
-    <nav className={`navbar-ova-updated fixed-top${onHero ? ' navbar-on-hero' : ''}${!isHome ? ' navbar-off-hero' : ''}${isDonatePage ? ' navbar-page-donate' : ''}${isOpen ? ' navbar-drawer-open' : ''}`}>
-      <div className="navbar-ova-updated-container">
+    <>
+      {favicon && (
+        <Helmet>
+          <link rel="icon" href={favicon} />
+          <link rel="apple-touch-icon" href={favicon} />
+        </Helmet>
+      )}
+      <nav className={`navbar-ova-updated fixed-top${onHero ? ' navbar-on-hero' : ''}${!isHome ? ' navbar-off-hero' : ''}${isDonatePage ? ' navbar-page-donate' : ''}${isOpen ? ' navbar-drawer-open' : ''}`}>
+        <div className="navbar-ova-updated-container">
 
         {/* Mobile backdrop – tap outside to close */}
         {isOpen && (
@@ -106,17 +131,17 @@ function Navbar() {
         {/* Logo: WebP 90w/180w (run optimize-images.js); fallback to PNG */}
         <Link className="navbar-brand navbar-brand-updated" to="/" aria-label="OVA™ Home">
           <img
-            src={getLogoUrls(onHero).src}
-            srcSet={getLogoUrls(onHero).srcSet}
-            sizes={getLogoUrls(onHero).sizes}
+            src={getLogoUrls(onHero, cmsGlobal).src}
+            srcSet={getLogoUrls(onHero, cmsGlobal).srcSet}
+            sizes={getLogoUrls(onHero, cmsGlobal).sizes}
             alt="OVA™"
             className="navbar-logo-ova"
             width={90}
             height={90}
             decoding="async"
             onError={(e) => {
-              const { fallback } = getLogoUrls(onHero);
-              if (!e.target.src.endsWith('.png')) {
+              const { fallback } = getLogoUrls(onHero, cmsGlobal);
+              if (fallback && !e.target.src.endsWith('.png') && !e.target.src.includes(fallback)) {
                 e.target.src = fallback;
                 e.target.onerror = null;
               }
@@ -129,7 +154,7 @@ function Navbar() {
 
           {/* ── Nav list ── */}
           <ul className="navbar-nav-updated">
-            {NAV_ITEMS.map((item) => {
+            {(fromCms && cmsGlobal?.navItems ? cmsGlobal.navItems : NAV_ITEMS).map((item) => {
               if (item.type === 'dropdown') {
                 const isActiveDropdown = item.key === 'about' ? isAboutActive() : isEventsActive();
                 const isOpenThis = openDropdown === item.key;
@@ -231,6 +256,7 @@ function Navbar() {
 
       </div>
     </nav>
+    </>
   );
 }
 

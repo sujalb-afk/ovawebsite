@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import SEO from '../components/SEO';
 import AboutHeroBg from '../components/AboutHeroBg';
 import { getOptimizedImageUrl } from '../utils/imageUrl';
+import { useCmsPage, useCmsTeam } from '../hooks/useCms';
+import { stripHtml } from '../utils/cmsHtml';
+import { pickImage } from '../utils/imageUrl';
 
 function getInitials(name) {
   return name
@@ -30,7 +33,10 @@ function TeamAvatar({ name, img }) {
 }
 
 function Team() {
-  const teamMembers = [
+  const { data: cmsData, seo: cmsSeo, fromCms } = useCmsPage('team');
+  const { team: cmsTeam, fromCms: teamFromCms } = useCmsTeam();
+
+  const fallbackTeamMembers = [
     {
       name: 'Rajendra Dure',
       role: 'Operations',
@@ -81,11 +87,23 @@ function Team() {
     },
   ];
 
+  const teamMembers = useMemo(() => {
+    if (teamFromCms && Array.isArray(cmsTeam) && cmsTeam.length > 0) {
+      return cmsTeam.map(t => ({
+        name: t.name || t.title || '',
+        role: t.role || t.subtitle || '',
+        bio: t.bio || t.description || '',
+        img: pickImage(t) || t.img || t.image || t.imageUrl || ''
+      }));
+    }
+    return fallbackTeamMembers;
+  }, [cmsTeam, teamFromCms]);
+
   return (
     <div className="team-page-wrap">
       <SEO
-        title="Our Team · Meet the Changemakers"
-        description="Meet the OVA™ team - dedicated volunteers and experts driving community empowerment. From operations to technology, sustainability to legal compliance."
+        title={cmsSeo?.title || "Our Team · Meet the Changemakers"}
+        description={cmsSeo?.description || "Meet the OVA™ team - dedicated volunteers and experts driving community empowerment. From operations to technology, sustainability to legal compliance."}
         canonical="/team"
         keywords="OVA™ team, NGO volunteers, OVA™ team members"
       />
@@ -96,9 +114,9 @@ function Team() {
         <div className="about-hero-overlay donate-hero-overlay" aria-hidden="true" />
         <div className="container about-hero-container">
           <div className="about-hero-content donate-hero-content">
-            <h1 className="about-hero-title">Our Team</h1>
+            <h1 className="about-hero-title">{fromCms && cmsData?.heroHeading ? cmsData.heroHeading : 'Our Team'}</h1>
             <p className="about-hero-subtext">
-              The hearts and hands behind our vision: dedicated changemakers driving impact.
+              {fromCms && cmsData?.heroSubtext ? stripHtml(cmsData.heroSubtext) : 'The hearts and hands behind our vision: dedicated changemakers driving impact.'}
             </p>
           </div>
         </div>

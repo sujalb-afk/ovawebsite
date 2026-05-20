@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import AboutHeroBg from '../components/AboutHeroBg';
-import { getOptimizedImageUrl } from '../utils/imageUrl';
+import { getOptimizedImageUrl, cmsImageUrl } from '../utils/imageUrl';
 import { useCmsPage } from '../hooks/useCms';
 import { mapCmsServiceCards } from '../utils/cmsMappers';
 import { stripHtml } from '../utils/cmsHtml';
@@ -165,7 +165,7 @@ function Services() {
               <div className="svc-pg-visual-inner">
                 {showImage(idx, svc.image) ? (
                   <img
-                    src={getOptimizedImageUrl(svc.image)}
+                    src={getOptimizedImageUrl(cmsImageUrl(svc.image))}
                     alt={svc.imageAlt || ''}
                     className="svc-pg-img"
                     width={400}
@@ -173,7 +173,7 @@ function Services() {
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
-                      if (e.target.src !== svc.image) { e.target.src = svc.image; e.target.onerror = null; return; }
+                      if (e.target.src !== cmsImageUrl(svc.image)) { e.target.src = cmsImageUrl(svc.image); e.target.onerror = null; return; }
                       setImgErrors((prev) => ({ ...prev, [idx]: true }));
                     }}
                   />

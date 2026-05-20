@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
-import { getOptimizedImageUrl } from '../utils/imageUrl';
+import { getOptimizedImageUrl, cmsImageUrl } from '../utils/imageUrl';
 import { useCmsPage } from '../hooks/useCms';
 import { mapCmsHeroSlides, mapCmsPrograms } from '../utils/cmsMappers';
 
@@ -157,7 +157,7 @@ function Home() {
   return (
     <div className="home-page-wrap">
       <div className="home-page-bg-layer" aria-hidden="true">
-        <img src={getOptimizedImageUrl('/images/homepage-bg.webp')} alt="" width={1920} height={1080} loading="lazy" decoding="async" className="home-page-bg-img" onError={(e) => { if (e.target.src !== '/images/homepage-bg.webp') { e.target.src = '/images/homepage-bg.webp'; e.target.onerror = null; } }} />
+        <img src={getOptimizedImageUrl(cmsImageUrl('/images/homepage-bg.webp'))} alt="" width={1920} height={1080} loading="lazy" decoding="async" className="home-page-bg-img" onError={(e) => { if (e.target.src !== cmsImageUrl('/images/homepage-bg.webp')) { e.target.src = cmsImageUrl('/images/homepage-bg.webp'); e.target.onerror = null; } }} />
       </div>
       <SEO 
         title={cmsSeo?.title || 'Volunteer India · OVA™ NGO'}
@@ -171,7 +171,7 @@ function Home() {
           {heroSlides.map((slide, index) => {
             const isActive = index === heroSlide;
             const isFirstSlide = index === 0;
-            const imageUrl = getOptimizedImageUrl(slide.image);
+            const imageUrl = getOptimizedImageUrl(cmsImageUrl(slide.image));
             return (
               <div
                 key={slide.image}

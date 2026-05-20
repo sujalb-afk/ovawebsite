@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import SEO from "../components/SEO";
 import Footer from "../components/Footer";
-import { getOptimizedImageUrl } from "../utils/imageUrl";
+import { getOptimizedImageUrl, cmsImageUrl } from "../utils/imageUrl";
 
 const API_BASE = import.meta.env.VITE_API_URL || import.meta.env.REACT_APP_API_URL || "";
 const PAGE_TITLE = "Donation Receipt";
@@ -94,7 +94,7 @@ function VerifyDonation() {
                     maxHeight: "85%",
                     opacity: 0.2,
                     pointerEvents: "none",
-                    backgroundImage: `url(${getOptimizedImageUrl("/images/ovafinal11.webp")})`,
+                    backgroundImage: `url(${getOptimizedImageUrl(cmsImageUrl("/images/ovafinal11.webp"))})`,
                     backgroundSize: "contain",
                     backgroundRepeat: "no-repeat",
                     backgroundPosition: "center",

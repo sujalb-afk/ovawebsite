@@ -5,10 +5,13 @@ import SEO from "../components/SEO";
 import AboutHeroBg from "../components/AboutHeroBg";
 import { loadRazorpayScript, openRazorpayCheckout } from "../utils/razorpay";
 import { taxinfo } from "../data/taxinfo";
+import { useCmsPage } from "../hooks/useCms";
+import { stripHtml } from "../utils/cmsHtml";
 
 const apiBase = import.meta.env.VITE_API_URL || import.meta.env.REACT_APP_API_URL || '';
 
 function Donate() {
+  const { data: cmsData, seo: cmsSeo, fromCms } = useCmsPage('donate');
   const location = useLocation();
   const navigate = useNavigate();
   const [feedAmountType, setFeedAmountType] = useState("preset");
@@ -185,8 +188,8 @@ function Donate() {
   return (
     <>
       <SEO
-        title="Donate to Create Impact"
-        description="Donate to OVA™. 50-100% tax deduction under 80G. Feed children, sponsor education. SBI FCRA Account details."
+        title={cmsSeo?.title || "Donate to Create Impact"}
+        description={cmsSeo?.description || "Donate to OVA™. 50-100% tax deduction under 80G. Feed children, sponsor education. SBI FCRA Account details."}
         canonical="/donate"
         keywords="donate OVA™, 80G tax exemption, NGO donation India, SBI FCRA, feed children"
       />
@@ -199,13 +202,13 @@ function Donate() {
           <div className="container about-hero-container">
             <div className="about-hero-content donate-hero-content">
               <p className="donate-hero-eyebrow">Every gift counts</p>
-              <h1 className="about-hero-title">Donate to<br /><em>Create Impact</em></h1>
+              <h1 className="about-hero-title">{fromCms && cmsData?.heroHeading ? cmsData.heroHeading : <>Donate to<br /><em>Create Impact</em></>}</h1>
               <blockquote className="donate-hero-quote">
-                We make a living by what we get. We make a life by what we give.
+                {fromCms && cmsData?.heroSubtext ? stripHtml(cmsData.heroSubtext) : 'We make a living by what we get. We make a life by what we give.'}
                 <cite>, Winston Churchill</cite>
               </blockquote>
               <button type="button" onClick={scrollToDonateForm} className="donate-hero-cta">
-                Donate Now
+                {fromCms && cmsData?.heroCtaLabel ? cmsData.heroCtaLabel : 'Donate Now'}
               </button>
             </div>
           </div>

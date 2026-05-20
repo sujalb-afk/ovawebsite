@@ -3,15 +3,23 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import AboutHeroBg from '../components/AboutHeroBg';
 import { SERVICES } from './Services';
-import { getOptimizedImageUrl } from '../utils/imageUrl';
+import { getOptimizedImageUrl, cmsImageUrl } from '../utils/imageUrl';
+import { useCmsService } from '../hooks/useCms';
+import { mapCmsServiceToCard } from '../utils/cmsMappers';
 
 function ServiceDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const svc = SERVICES.find((s) => String(s.id) === String(id));
+  const { service: cmsService, loading } = useCmsService(id);
+  const staticSvc = SERVICES.find((s) => String(s.id) === String(id));
+  const svc = cmsService ? mapCmsServiceToCard(cmsService) : staticSvc;
+
+  if (!loading && !svc) {
+    navigate('/services', { replace: true });
+    return null;
+  }
 
   if (!svc) {
-    navigate('/services', { replace: true });
     return null;
   }
 
@@ -47,7 +55,7 @@ function ServiceDetail() {
             {/* Service image */}
             <div className="svc-detail-media">
               {svc.image ? (
-                <img src={getOptimizedImageUrl(svc.image)} alt={svc.imageAlt || svc.title} className="svc-detail-img" width={800} height={500} loading="lazy" decoding="async" onError={(e) => { if (e.target.src !== svc.image) { e.target.src = svc.image; e.target.onerror = null; } }} />
+                <img src={getOptimizedImageUrl(cmsImageUrl(svc.image))} alt={svc.imageAlt || svc.title} className="svc-detail-img" width={800} height={500} loading="lazy" decoding="async" onError={(e) => { if (e.target.src !== cmsImageUrl(svc.image)) { e.target.src = cmsImageUrl(svc.image); e.target.onerror = null; } }} />
               ) : (
                 <div className="svc-detail-placeholder" style={{ background: svc.bg }} aria-label="Program visual">
                   <i className={`bi ${svc.icon}`} aria-hidden="true" />

@@ -8,6 +8,7 @@ const WHY_ICONS = [
   'bi-trophy',
   'bi-lightning-charge',
 ];
+import { pickImage, cmsImageUrl } from './imageUrl';
 
 const SERVICE_ICONS = {
   Career: 'bi-briefcase',
@@ -43,7 +44,7 @@ export function mapCmsHeroSlides(cmsSlides, fallbackSlides) {
     const heading = (slide.heading || slide.title || '').trim();
     return {
       ...base,
-      image: slide.image || slide.imageUrl || base.image,
+      image: pickImage(slide) || base.image,
       eyebrow: slide.eyebrow || slide.subheading || base.eyebrow,
       headlineParts: heading ? [heading] : base.headlineParts,
       subtext: slide.subheading || slide.body || slide.subtext || base.subtext,
@@ -113,7 +114,7 @@ export function mapCmsServiceCards(cmsCards, fallbackServices) {
       category: tag,
       title: card.title || base.title,
       desc: card.body || card.desc || base.desc,
-      image: card.image || card.imageUrl || base.image,
+      image: pickImage(card) || base.image,
       points: bullets.length
         ? bullets.map((text, i) => ({
             icon: base.points?.[i]?.icon || 'bi-check-circle',
@@ -148,7 +149,7 @@ export function mapCmsEventToCard(ev) {
     address: ev.address || ev.location || '',
     organization: ev.organization || 'OVA™',
     contact: ev.contact || ev.contactEmail || 'support@ova.ngo',
-    image: ev.imageUrl || ev.image || (Array.isArray(ev.imageUrls) && ev.imageUrls[0]) || (Array.isArray(ev.images) && ev.images[0]?.url) || '',
+    image: pickImage(ev) || (Array.isArray(ev.images) && ev.images[0]?.url ? cmsImageUrl(ev.images[0].url) : ''),
     desc,
     highlights: Array.isArray(ev.highlights) ? ev.highlights : [],
   };

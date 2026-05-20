@@ -5,6 +5,8 @@ import AboutHeroBg from '../components/AboutHeroBg';
 import { Sparkles, GraduationCap, Users, Award, Send, CheckCircle2, MapPin, Rocket, BookOpen, Globe, Calendar, ClipboardList } from 'lucide-react';
 import SEO from '../components/SEO';
 import { loadRecaptchaScript } from '../utils/recaptchaLoader';
+import { useCmsPage } from '../hooks/useCms';
+import { stripHtml } from '../utils/cmsHtml';
 
 const ReCAPTCHA = lazy(() => import('react-google-recaptcha'));
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || import.meta.env.REACT_APP_RECAPTCHA_SITE_KEY || '6LdpmIUsAAAAAFjnXdOOSY5wDXZelXs0RD4EZ-uh';
@@ -47,6 +49,7 @@ function AnimatedStat({ target, suffix = '', duration = 2000, isVisible }) {
 }
 
 function Join() {
+  const { data: cmsData, seo: cmsSeo, fromCms } = useCmsPage('join');
   const formRef = useRef(null);
   const statsRef = useRef(null);
   const [statsVisible, setStatsVisible] = useState(false);
@@ -166,8 +169,8 @@ function Join() {
   return (
     <>
       <SEO
-        title="Join as a Volunteer · Become a Member"
-        description="Join OVA™ as a volunteer or member. Create impact, learn, and be part of a community of changemakers."
+        title={cmsSeo?.title || "Join as a Volunteer · Become a Member"}
+        description={cmsSeo?.description || "Join OVA™ as a volunteer or member. Create impact, learn, and be part of a community of changemakers."}
         canonical="/join"
         keywords="join OVA™, become volunteer, NGO membership, volunteer India, OVA™ volunteer"
       />
@@ -180,13 +183,13 @@ function Join() {
           <div className="container about-hero-container">
             <div className="about-hero-content donate-hero-content">
               <p className="donate-hero-eyebrow">Volunteer</p>
-              <h1 className="about-hero-title">Become a Volunteer. Create <em>Impact</em>.</h1>
+              <h1 className="about-hero-title">{fromCms && cmsData?.heroHeading ? cmsData.heroHeading : <>Become a Volunteer. Create <em>Impact</em>.</>}</h1>
               <blockquote className="donate-hero-quote">
-                Join OVA™ and be part of a community that empowers lives and transforms futures.
+                {fromCms && cmsData?.heroSubtext ? stripHtml(cmsData.heroSubtext) : 'Join OVA™ and be part of a community that empowers lives and transforms futures.'}
                 <cite>, OVA™</cite>
               </blockquote>
               <button type="button" onClick={scrollToForm} className="donate-hero-cta">
-                Apply Now
+                {fromCms && cmsData?.heroCtaLabel ? cmsData.heroCtaLabel : 'Apply Now'}
               </button>
             </div>
           </div>

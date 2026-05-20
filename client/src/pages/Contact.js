@@ -4,6 +4,8 @@ import { MapPin, Mail, Phone } from 'lucide-react';
 import SEO from '../components/SEO';
 import AboutHeroBg from '../components/AboutHeroBg';
 import { loadRecaptchaScript } from '../utils/recaptchaLoader';
+import { useCmsPage } from '../hooks/useCms';
+import { stripHtml } from '../utils/cmsHtml';
 
 const ReCAPTCHA = lazy(() => import('react-google-recaptcha'));
 
@@ -33,6 +35,7 @@ const INITIAL_CONTACT_FORM = {
 };
 
 function Contact() {
+  const { data: cmsData, seo: cmsSeo, fromCms } = useCmsPage('contact');
   const recaptchaRef = useRef(null);
   const submitWrapRef = useRef(null);
   const [recaptchaReady, setRecaptchaReady] = useState(false);
@@ -114,8 +117,8 @@ function Contact() {
   return (
     <>
       <SEO
-        title="Contact Us · Get in Touch"
-        description="Contact OVA™. Address: Chavan-dafale colony, Uchgaon, Kolhapur. Phone: +91 8080677811 | Email: support@ova.ngo"
+        title={cmsSeo?.title || "Contact Us · Get in Touch"}
+        description={cmsSeo?.description || "Contact OVA™. Address: Chavan-dafale colony, Uchgaon, Kolhapur. Phone: +91 8080677811 | Email: support@ova.ngo"}
         canonical="/contact"
         keywords="OVA™ contact, NGO Kolhapur, volunteer contact, support ova.ngo"
       />
@@ -127,12 +130,12 @@ function Contact() {
           <div className="about-hero-overlay" aria-hidden="true" />
           <div className="container about-hero-container">
             <div className="about-hero-content">
-              <h1 className="about-hero-title">Get in Touch</h1>
+              <h1 className="about-hero-title">{fromCms && cmsData?.heroHeading ? cmsData.heroHeading : 'Get in Touch'}</h1>
               <p className="about-hero-subtext">
-                We&apos;d love to hear from you. Reach out for inquiries, partnerships, or to learn how you can make a difference.
+                {fromCms && cmsData?.heroSubtext ? stripHtml(cmsData.heroSubtext) : 'We\'d love to hear from you. Reach out for inquiries, partnerships, or to learn how you can make a difference.'}
               </p>
               <a href="#contact-form" className="btn btn-light btn-lg px-5 py-3 fw-bold contact-hero-cta">
-                Send a Message
+                {fromCms && cmsData?.heroCtaLabel ? cmsData.heroCtaLabel : 'Send a Message'}
               </a>
             </div>
           </div>
@@ -145,7 +148,7 @@ function Contact() {
               {/* Left Column - Contact Info */}
               <div className="col-lg-5">
                 <div className="contact-info-card">
-                  <h3 className="contact-info-title">Contact Information</h3>
+                  <h3 className="contact-info-title">{fromCms && cmsData?.infoHeading ? cmsData.infoHeading : 'Contact Information'}</h3>
                   <ul className="contact-info-list">
                     <li>
                       <MapPin size={20} className="contact-info-icon" />
@@ -175,7 +178,7 @@ function Contact() {
               {/* Right Column - Contact Form */}
               <div className="col-lg-7">
                 <div id="contact-form" className="contact-form-card">
-                  <h3 className="contact-form-title">Send a Message</h3>
+                  <h3 className="contact-form-title">{fromCms && cmsData?.formHeading ? cmsData.formHeading : 'Send a Message'}</h3>
                   <form key={formKey} onSubmit={handleSubmit} noValidate autoComplete="off">
                     <div className="row g-3">
                       <div className="col-md-6">
@@ -280,9 +283,9 @@ function Contact() {
         {/* 3. Map Section */}
         <section className="contact-map-section">
           <div className="contact-map-header">
-            <h2 className="contact-map-title">Find Us</h2>
+            <h2 className="contact-map-title">{fromCms && cmsData?.mapHeading ? cmsData.mapHeading : 'Find Us'}</h2>
             <p className="contact-map-desc">
-              OVA™ is located in Chavan-dafale colony, Uchgaon, Kolhapur. Use the map below to get directions or plan your visit. We are available Monday–Saturday, 9:00 AM – 6:00 PM IST.
+              {fromCms && cmsData?.mapBody ? stripHtml(cmsData.mapBody) : 'OVA™ is located in Chavan-dafale colony, Uchgaon, Kolhapur. Use the map below to get directions or plan your visit. We are available Monday–Saturday, 9:00 AM – 6:00 PM IST.'}
             </p>
           </div>
           <div className="contact-map-wrapper">
@@ -302,8 +305,8 @@ function Contact() {
         {/* 4. FAQ / Quick Help: same accordion style as Donate page */}
         <section className="d-section d-section-grey d-faq-section contact-faq-section">
           <div className="d-faq-section-header">
-            <h2 className="d-faq-title">Quick Help</h2>
-            <p className="d-faq-subtitle">Common questions answered</p>
+            <h2 className="d-faq-title">{fromCms && cmsData?.faqHeading ? cmsData.faqHeading : 'Quick Help'}</h2>
+            <p className="d-faq-subtitle">{fromCms && cmsData?.faqSubtitle ? cmsData.faqSubtitle : 'Common questions answered'}</p>
             <div className="d-section-line d-faq-line" />
           </div>
           <div className="d-faq-accordion">

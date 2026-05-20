@@ -5,6 +5,9 @@ const {
   fetchCmsEvents,
   fetchCmsEvent,
   fetchCmsServices,
+  fetchCmsGallery,
+  fetchCmsGalleryItem,
+  fetchCmsTeam,
   fetchCmsHealth,
   isCmsEnabled,
 } = require('../lib/cmsApi');
@@ -91,6 +94,34 @@ router.get('/services', async (_req, res) => {
     ok: Boolean(services),
     fromCms: Boolean(services),
     services: services || [],
+  });
+});
+
+router.get('/gallery', async (_req, res) => {
+  noStoreJson(res);
+  const gallery = await fetchCmsGallery();
+  res.json({
+    ok: Boolean(gallery),
+    fromCms: Boolean(gallery),
+    gallery: gallery || [],
+  });
+});
+
+router.get('/gallery/:id', async (req, res) => {
+  const item = await fetchCmsGalleryItem(req.params.id);
+  if (!item) {
+    return res.json({ ok: false, fromCms: false, item: null });
+  }
+  res.json({ ok: true, fromCms: true, item });
+});
+
+router.get('/team', async (_req, res) => {
+  noStoreJson(res);
+  const team = await fetchCmsTeam();
+  res.json({
+    ok: Boolean(team),
+    fromCms: Boolean(team),
+    team: team || [],
   });
 });
 

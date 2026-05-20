@@ -2,8 +2,12 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import AboutHeroBg from '../components/AboutHeroBg';
-import { getOptimizedImageUrl } from '../utils/imageUrl';
+import { getOptimizedImageUrl, cmsImageUrl } from '../utils/imageUrl';
 import { GALLERY_ITEMS, getUniqueGalleryItems } from '../data/galleryItems';
+import { useCmsPage, useCmsGallery } from '../hooks/useCms';
+import { stripHtml } from '../utils/cmsHtml';
+import { pickImage } from '../utils/imageUrl';
+
 
 const MAX_HOVER_LENGTH = 180;
 
@@ -15,13 +19,27 @@ function truncate(str, max = MAX_HOVER_LENGTH) {
 const PLACEHOLDER = 'https://via.placeholder.com/600x400/2d6a4f/ffffff?text=OVA™+Gallery';
 
 function Gallery() {
-  const uniqueGalleryImages = useMemo(() => getUniqueGalleryItems(GALLERY_ITEMS), []);
+  const { data: cmsData, seo: cmsSeo, fromCms } = useCmsPage('gallery');
+  const { gallery: cmsGallery, fromCms: galleryFromCms } = useCmsGallery();
+
+  const uniqueGalleryImages = useMemo(() => {
+    if (galleryFromCms && Array.isArray(cmsGallery) && cmsGallery.length > 0) {
+      return cmsGallery.map((g) => ({
+        src: pickImage(g) || g.imageUrl || g.image,
+        alt: g.title || 'Gallery image',
+        title: g.title,
+        summary: g.subtitle || g.category,
+        slug: g.slug || g._id || g.id,
+      }));
+    }
+    return getUniqueGalleryItems(GALLERY_ITEMS);
+  }, [cmsGallery, galleryFromCms]);
 
   return (
     <div className="gallery-page-wrap">
       <SEO
-        title="Gallery · Stories of Impact"
-        description="OVA™ Gallery - Inspiring stories and images from our volunteer programs, community initiatives, and sustainability events."
+        title={cmsSeo?.title || "Gallery · Stories of Impact"}
+        description={cmsSeo?.description || "OVA™ Gallery - Inspiring stories and images from our volunteer programs, community initiatives, and sustainability events."}
         canonical="/gallery"
         keywords="OVA™ gallery, NGO photos, volunteer India"
       />
@@ -32,9 +50,9 @@ function Gallery() {
         <div className="about-hero-overlay" aria-hidden="true" />
         <div className="container about-hero-container">
           <div className="about-hero-content">
-            <h1 className="about-hero-title">Gallery</h1>
+            <h1 className="about-hero-title">{fromCms && cmsData?.heroHeading ? cmsData.heroHeading : 'Gallery'}</h1>
             <p className="about-hero-subtext">
-              OVA™ Gallery | Inspiring stories and images from our programs and events.
+              {fromCms && cmsData?.heroSubtext ? stripHtml(cmsData.heroSubtext) : 'OVA™ Gallery | Inspiring stories and images from our programs and events.'}
             </p>
           </div>
         </div>
@@ -48,7 +66,7 @@ function Gallery() {
               <figure key={item.src} className="gallery-card">
                 <div className="gallery-card-inner">
                   <img
-                    src={getOptimizedImageUrl(item.src)}
+                    src={getOptimizedImageUrl(cmsImageUrl(item.src))}
                     alt={item.alt}
                     className="gallery-card-img"
                     width={400}
@@ -56,7 +74,7 @@ function Gallery() {
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
-                      e.target.src = item.src;
+                      e.target.src = cmsImageUrl(item.src);
                       e.target.onerror = () => { e.target.src = PLACEHOLDER; e.target.onerror = null; };
                     }}
                   />

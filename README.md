@@ -82,11 +82,18 @@ ova/
 
 - `POST /api/contact` - Submit contact form
 - `POST /api/newsletter` - Newsletter subscription
+- `GET /api/cms/*` - Proxies requests to the CMS-OVA backend to serve dynamic content if available.
+
+## CMS Integration
+
+This app is fully integrated with **CMS-OVA**. 
+- It uses standard `fetch` along with client-side session caching for fetching global structure (Navbar/Footer), list data (Events, Services, Gallery, Team), and page-specific content.
+- **Environment Flag**: Control the integration using the `OVA_CMS_CONTENT_ENABLED` environment variable and providing the CMS URL in `OVA_CMS_API_URL`.
+- **Graceful Fallback**: If the CMS is offline, the app seamlessly falls back to static content ensuring 100% uptime.
 
 ## Images
 
-The app uses images from the original OVA website (ova.ngo) where available. Some images may use placeholders if the original URLs are inaccessible. For full image support, you can download images from the original site and place them in `client/public/images/`.
-
+Images must use API URLs as-is; there are two valid hosts: the CMS host (e.g. ngrok) and ova.ngo. Do not alter image URLs returned from the CMS API. The app uses images from the original OVA website (ova.ngo) where available. Some images may use placeholders if the original URLs are inaccessible. For full image support, you can download images from the original site and place them in `client/public/images/`.
 ## License
 
 MIT - Educational/portfolio project. Original content © Bharatiya Open Volunteer Association.

@@ -1,18 +1,50 @@
-import React from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useCmsGallery, useCmsGalleryItem } from '../hooks/useCms';
 import SEO from '../components/SEO';
 import AboutHeroBg from '../components/AboutHeroBg';
-import { getOptimizedImageUrl } from '../utils/imageUrl';
+import { getOptimizedImageUrl, pickImage, cmsImageUrl } from '../utils/imageUrl';
 import { GALLERY_ITEMS, getUniqueGalleryItems } from '../data/galleryItems';
 
 const PLACEHOLDER = 'https://via.placeholder.com/900x675/2d6a4f/ffffff?text=OVA™+Gallery';
 
 function GalleryDetail() {
   const { slug } = useParams();
-  const publishedItems = getUniqueGalleryItems(GALLERY_ITEMS);
+  
+  const { gallery: cmsGallery, fromCms: galleryFromCms } = useCmsGallery();
+  const { item: cmsItem, fromCms: itemFromCms } = useCmsGalleryItem(slug);
+
+  const publishedItems = galleryFromCms && Array.isArray(cmsGallery) && cmsGallery.length > 0 
+    ? cmsGallery.map((g) => ({
+        src: pickImage(g) || g.imageUrl || g.image,
+        alt: g.title || 'Gallery image',
+        title: g.title,
+        summary: g.subtitle || g.category,
+        slug: g.slug || g._id || g.id,
+        displayDate: g.displayDate || '',
+        location: g.location || '',
+        category: g.category || '',
+        description: g.description || g.subtitle || '',
+        tags: g.tags || [],
+      }))
+    : getUniqueGalleryItems(GALLERY_ITEMS);
+
   const uniqueItem = publishedItems.find((entry) => entry.slug === slug);
-  const sourceItem = uniqueItem || GALLERY_ITEMS.find((entry) => entry.slug === slug);
-  const item = uniqueItem || (sourceItem ? publishedItems.find((entry) => entry.src === sourceItem.src) : null);
+  const sourceItem = !galleryFromCms ? (uniqueItem || GALLERY_ITEMS.find((entry) => entry.slug === slug)) : null;
+  const fallbackItem = uniqueItem || (sourceItem ? publishedItems.find((entry) => entry.src === sourceItem.src) : null);
+
+  const item = itemFromCms && cmsItem ? {
+    src: pickImage(cmsItem) || cmsItem.imageUrl || cmsItem.image,
+    alt: cmsItem.title || 'Gallery image',
+    title: cmsItem.title,
+    summary: cmsItem.subtitle || cmsItem.category,
+    slug: cmsItem.slug || cmsItem._id || cmsItem.id,
+    displayDate: cmsItem.displayDate || '',
+    location: cmsItem.location || '',
+    category: cmsItem.category || '',
+    description: cmsItem.description || cmsItem.subtitle || '',
+    tags: cmsItem.tags || [],
+  } : fallbackItem;
+
   const currentIndex = publishedItems.findIndex((entry) => entry.slug === item?.slug);
   const hasItems = publishedItems.length > 0 && currentIndex >= 0;
   const prevItem = hasItems
@@ -79,14 +111,14 @@ function GalleryDetail() {
           <div className="gallery-detail-layout">
             <div className="gallery-detail-image-wrap">
               <img
-                src={getOptimizedImageUrl(item.src)}
+                src={getOptimizedImageUrl(cmsImageUrl(item.src))}
                 alt={item.alt}
                 className="gallery-detail-image"
                 width={900}
                 height={675}
                 decoding="async"
                 onError={(e) => {
-                  e.target.src = item.src;
+                  e.target.src = cmsImageUrl(item.src);
                   e.target.onerror = () => { e.target.src = PLACEHOLDER; e.target.onerror = null; };
                 }}
               />

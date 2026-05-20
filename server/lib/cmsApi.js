@@ -199,6 +199,21 @@ async function fetchCmsServices() {
   return Array.isArray(data) ? data : null;
 }
 
+async function fetchCmsGallery() {
+  const data = await fetchCms('/gallery');
+  return Array.isArray(data) ? data : null;
+}
+
+async function fetchCmsGalleryItem(id) {
+  const data = await fetchCms(`/gallery/${encodeURIComponent(id)}`);
+  return data && typeof data === 'object' && !Array.isArray(data) ? data : null;
+}
+
+async function fetchCmsTeam() {
+  const data = await fetchCms('/team');
+  return Array.isArray(data) ? data : null;
+}
+
 async function fetchCmsHealth() {
   if (!CMS_BASE && !CMS_LOCAL) {
     return { ok: false, enabled: false, message: 'OVA_CMS_API_URL not set' };
@@ -232,6 +247,9 @@ module.exports = {
   fetchCmsEvents,
   fetchCmsEvent,
   fetchCmsServices,
+  fetchCmsGallery,
+  fetchCmsGalleryItem,
+  fetchCmsTeam,
   fetchCmsHealth,
   isCmsEnabled,
 };

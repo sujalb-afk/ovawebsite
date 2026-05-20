@@ -336,3 +336,230 @@ export function useCmsEvent(id) {
 
   return state;
 }
+
+export function useCmsGlobal() {
+  const [state, setState] = useState({
+    loading: true,
+    global: null,
+    fromCms: false,
+    stale: false,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      const enabled = await checkCmsEnabled();
+      if (cancelled || !enabled) {
+        if (!cancelled) setState({ loading: false, global: null, fromCms: false, stale: false });
+        return;
+      }
+
+      const json = await cmsFetch('/global');
+      if (cancelled) return;
+
+      if (json?.ok && json.global) {
+        setState({
+          loading: false,
+          global: json.global,
+          fromCms: true,
+          stale: Boolean(json.stale),
+        });
+        return;
+      }
+
+      setState({ loading: false, global: null, fromCms: false, stale: false });
+    };
+
+    load();
+    const intervalId = setInterval(load, CMS_REFETCH_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+  }, []);
+
+  return state;
+}
+
+export function useCmsGallery() {
+  const [state, setState] = useState({
+    loading: true,
+    gallery: null,
+    fromCms: false,
+    stale: false,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      const enabled = await checkCmsEnabled();
+      if (cancelled || !enabled) {
+        if (!cancelled) setState({ loading: false, gallery: null, fromCms: false, stale: false });
+        return;
+      }
+
+      const json = await cmsFetch('/gallery');
+      if (cancelled) return;
+
+      if (json?.ok && Array.isArray(json.gallery)) {
+        setState({
+          loading: false,
+          gallery: json.gallery,
+          fromCms: true,
+          stale: Boolean(json.stale),
+        });
+        return;
+      }
+
+      setState({ loading: false, gallery: null, fromCms: false, stale: false });
+    };
+
+    load();
+    const intervalId = setInterval(load, CMS_REFETCH_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+  }, []);
+
+  return state;
+}
+
+export function useCmsGalleryItem(id) {
+  const [state, setState] = useState({
+    loading: true,
+    item: null,
+    fromCms: false,
+    stale: false,
+  });
+
+  useEffect(() => {
+    if (!id) return undefined;
+    let cancelled = false;
+
+    const load = async () => {
+      const enabled = await checkCmsEnabled();
+      if (cancelled || !enabled) {
+        if (!cancelled) setState({ loading: false, item: null, fromCms: false, stale: false });
+        return;
+      }
+
+      const json = await cmsFetch(`/gallery/${encodeURIComponent(id)}`);
+      if (cancelled) return;
+
+      if (json?.ok && json.item) {
+        setState({
+          loading: false,
+          item: json.item,
+          fromCms: true,
+          stale: Boolean(json.stale),
+        });
+        return;
+      }
+
+      setState({ loading: false, item: null, fromCms: false, stale: false });
+    };
+
+    load();
+    const intervalId = setInterval(load, CMS_REFETCH_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+  }, [id]);
+
+  return state;
+}
+
+export function useCmsService(id) {
+  const [state, setState] = useState({
+    loading: true,
+    service: null,
+    fromCms: false,
+    stale: false,
+  });
+
+  useEffect(() => {
+    if (!id) return undefined;
+    let cancelled = false;
+
+    const load = async () => {
+      const enabled = await checkCmsEnabled();
+      if (cancelled || !enabled) {
+        if (!cancelled) setState({ loading: false, service: null, fromCms: false, stale: false });
+        return;
+      }
+
+      const json = await cmsFetch(`/services/${encodeURIComponent(id)}`);
+      if (cancelled) return;
+
+      if (json?.ok && json.service) {
+        setState({
+          loading: false,
+          service: json.service,
+          fromCms: true,
+          stale: Boolean(json.stale),
+        });
+        return;
+      }
+
+      setState({ loading: false, service: null, fromCms: false, stale: false });
+    };
+
+    load();
+    const intervalId = setInterval(load, CMS_REFETCH_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+  }, [id]);
+
+  return state;
+}
+
+export function useCmsTeam() {
+  const [state, setState] = useState({
+    loading: true,
+    team: null,
+    fromCms: false,
+    stale: false,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      const enabled = await checkCmsEnabled();
+      if (cancelled || !enabled) {
+        if (!cancelled) setState({ loading: false, team: null, fromCms: false, stale: false });
+        return;
+      }
+
+      const json = await cmsFetch('/team');
+      if (cancelled) return;
+
+      if (json?.ok && Array.isArray(json.team)) {
+        setState({
+          loading: false,
+          team: json.team,
+          fromCms: true,
+          stale: Boolean(json.stale),
+        });
+        return;
+      }
+
+      setState({ loading: false, team: null, fromCms: false, stale: false });
+    };
+
+    load();
+    const intervalId = setInterval(load, CMS_REFETCH_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+  }, []);
+
+  return state;
+}

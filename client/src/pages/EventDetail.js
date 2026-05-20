@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import AboutHeroBg from '../components/AboutHeroBg';
 import { EVENTS } from './Events';
-import { getOptimizedImageUrl } from '../utils/imageUrl';
+import { getOptimizedImageUrl, cmsImageUrl } from '../utils/imageUrl';
 import { useCmsEvent } from '../hooks/useCms';
 import { mapCmsEventToCard } from '../utils/cmsMappers';
 
@@ -64,7 +64,7 @@ function EventDetail() {
             {/* Event image */}
             <div className="ev-detail-media">
               {ev.image ? (
-                <img src={getOptimizedImageUrl(ev.image)} alt={ev.title} className="ev-detail-img" width={800} height={500} loading="lazy" decoding="async" onError={(e) => { if (e.target.src !== ev.image) { e.target.src = ev.image; e.target.onerror = null; } }} />
+                <img src={getOptimizedImageUrl(cmsImageUrl(ev.image))} alt={ev.title} className="ev-detail-img" width={800} height={500} loading="lazy" decoding="async" onError={(e) => { if (e.target.src !== cmsImageUrl(ev.image)) { e.target.src = cmsImageUrl(ev.image); e.target.onerror = null; } }} />
               ) : (
                 <div className="ev-detail-placeholder" aria-label="Image coming soon">
                   <i className="bi bi-camera" aria-hidden="true" />
