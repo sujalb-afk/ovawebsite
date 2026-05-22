@@ -73,6 +73,35 @@ const { getMongoUri, getDbName, isLocalUri } = require('./utils/mongoUri');
 const MONGODB_URI = getMongoUri();
 const DB_NAME = getDbName();
 
+// Proxy CMS uploads to CMS-OVA (browser uses same-origin /uploads/* paths)
+const CMS_UPLOADS_TARGET = (
+  process.env.OVA_CMS_ASSET_URL ||
+  process.env.OVA_CMS_API_URL ||
+  ''
+).replace(/\/$/, '');
+
+app.use('/uploads', async (req, res) => {
+  try {
+    const upstream = `${CMS_UPLOADS_TARGET}${req.originalUrl}`;
+    const upstreamRes = await fetch(upstream, {
+      headers: {
+        Accept: '*/*',
+        'ngrok-skip-browser-warning': '1',
+        ...(process.env.OVA_CMS_PUBLIC_API_KEY
+          ? { 'x-api-key': process.env.OVA_CMS_PUBLIC_API_KEY }
+          : {}),
+      },
+    });
+    res.status(upstreamRes.status);
+    const ct = upstreamRes.headers.get('content-type');
+    if (ct) res.setHeader('Content-Type', ct);
+    const buf = Buffer.from(await upstreamRes.arrayBuffer());
+    res.send(buf);
+  } catch (err) {
+    res.status(502).send('CMS uploads proxy error');
+  }
+});
+
 // API Routes
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/newsletter', require('./routes/newsletter'));
@@ -170,10 +199,8 @@ function startServer(withoutMongo = false) {
         : `Server running on http://0.0.0.0:${PORT}`
     );
     if (process.env.OVA_CMS_CONTENT_ENABLED === 'true') {
-      const local = process.env.OVA_CMS_LOCAL_URL || 'http://localhost:5000';
-      console.log(
-        `[CMS] Proxy /api/cms/* → ${process.env.OVA_CMS_API_URL || '(unset)'} (dev fallback: ${local})`
-      );
+      const cmsApi = process.env.OVA_CMS_API_URL || '(unset — set OVA_CMS_API_URL in server/.env)';
+      console.log(`[CMS] Proxy /api/cms/* → ${cmsApi}`);
     }
     verifySmtpConnectionAsync().catch(() => {});
   });

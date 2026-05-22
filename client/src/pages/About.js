@@ -35,19 +35,19 @@ const WHY = [
 ];
 
 function About() {
-  const { data: cmsData, seo: cmsSeo, fromCms } = useCmsPage('about');
+  const { data: cmsData, seo: cmsSeo } = useCmsPage('about');
   const mvv = useMemo(() => {
-    if (fromCms && cmsData?.mvvCards?.length) return mapCmsMvvCards(cmsData.mvvCards, MVV);
+    if (cmsData?.mvvCards?.length) return mapCmsMvvCards(cmsData.mvvCards, MVV);
     return MVV;
-  }, [cmsData, fromCms]);
+  }, [cmsData]);
   const why = useMemo(() => {
-    if (fromCms && cmsData?.whyFeatures?.length) return mapCmsWhyFeatures(cmsData.whyFeatures, WHY);
+    if (cmsData?.whyFeatures?.length) return mapCmsWhyFeatures(cmsData.whyFeatures, WHY);
     return WHY;
-  }, [cmsData, fromCms]);
-  const heroQuote = fromCms && cmsData?.heroQuote
+  }, [cmsData]);
+  const heroQuote = cmsData?.heroQuote
     ? stripHtml(cmsData.heroQuote)
     : 'We use technology to grow volunteerism, one community at a time.';
-  const heroCtaLabel = fromCms ? cmsData?.heroCtaLabel || null : null;
+  const heroCtaLabel = cmsData?.heroCtaLabel || null;
 
   useEffect(() => {
     const reveals = document.querySelectorAll('.about-reveal');
@@ -94,9 +94,9 @@ function About() {
       {/* ── About Intro ── */}
       <section className="about-intro-section">
         <div className="about-intro-inner">
-          <span className="about-intro-label">{fromCms && cmsData?.introLabel ? cmsData.introLabel : 'Who We Are'}</span>
+          <span className="about-intro-label">{cmsData?.introLabel ? cmsData.introLabel : 'Who We Are'}</span>
           <h2 className="about-intro-title">
-            {fromCms && cmsData?.introHeading ? (
+            {cmsData?.introHeading ? (
               cmsData.introHeading
             ) : (
               <>Advancing <em>Volunteerism</em><br />Through Technology</>
@@ -104,7 +104,7 @@ function About() {
           </h2>
           <div className="about-intro-divider" aria-hidden="true" />
           <div className="about-intro-body">
-            {fromCms && cmsData?.introBody ? (
+            {cmsData?.introBody ? (
               <CmsHtml html={cmsData.introBody} />
             ) : (
               <p>
@@ -134,8 +134,8 @@ function About() {
       {/* ── Why OVA™ ── */}
       <section className="about-why-section">
         <div className="about-why-header about-reveal">
-          <h2>{fromCms && cmsData?.whyHeading ? cmsData.whyHeading : 'Why work with OVA™'}</h2>
-          <p>{fromCms && cmsData?.whyBody ? cmsData.whyBody : 'When you partner with OVA™, you work with an NGO that uses technology for real impact. We help volunteers and communities communicate and engage better, and we promote sustainability and inclusion so that social change can happen.'}</p>
+          <h2>{cmsData?.whyHeading ? cmsData.whyHeading : 'Why work with OVA™'}</h2>
+          <p>{cmsData?.whyBody ? cmsData.whyBody : 'When you partner with OVA™, you work with an NGO that uses technology for real impact. We help volunteers and communities communicate and engage better, and we promote sustainability and inclusion so that social change can happen.'}</p>
         </div>
         <div className="about-why-grid">
           {why.map((item, idx) => (

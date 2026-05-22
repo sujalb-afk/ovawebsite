@@ -3,9 +3,8 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  // OVA Web backend (CMS proxy /api/cms/*). CMS-OVA runs on :5000 — do not proxy there.
+  // OVA Web backend: /api/cms/* and /uploads (server proxies uploads to OVA_CMS_API_URL)
   const apiTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:5004';
-  const cmsAssetTarget = env.VITE_OVA_CMS_ASSET_URL || 'http://localhost:5000';
 
   return {
   plugins: [react()],
@@ -24,13 +23,15 @@ export default defineConfig(({ mode }) => {
   },
   server: {
     port: 3000,
+    // Bind IPv4 + IPv6 — default [::1]-only breaks http://localhost:3000 in Chrome (ERR_CONNECTION_REFUSED)
+    host: true,
     proxy: {
       '/api': {
         target: apiTarget,
         changeOrigin: true,
       },
       '/uploads': {
-        target: cmsAssetTarget,
+        target: apiTarget,
         changeOrigin: true,
       },
     },

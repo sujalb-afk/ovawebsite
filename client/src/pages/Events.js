@@ -120,18 +120,18 @@ const EVENTS_PAGE_DEFAULTS = {
 };
 
 function Events() {
-  const { data: cmsData, seo: cmsSeo, fromCms } = useCmsPage('events');
-  const { events: cmsEvents, fromCms: eventsFromCms } = useCmsEvents();
+  const { data: cmsData, seo: cmsSeo } = useCmsPage('events');
+  const { events: cmsEvents } = useCmsEvents();
   const pageCopy = useMemo(
-    () => (fromCms && cmsData ? normalizeEventsPageCopy(cmsData, EVENTS_PAGE_DEFAULTS) : EVENTS_PAGE_DEFAULTS),
-    [cmsData, fromCms]
+    () => (cmsData ? normalizeEventsPageCopy(cmsData, EVENTS_PAGE_DEFAULTS) : EVENTS_PAGE_DEFAULTS),
+    [cmsData]
   );
   const events = useMemo(() => {
-    if (eventsFromCms && Array.isArray(cmsEvents)) {
+    if (Array.isArray(cmsEvents) && cmsEvents.length) {
       return cmsEvents.map(mapCmsEventToCard);
     }
     return EVENTS;
-  }, [cmsEvents, eventsFromCms]);
+  }, [cmsEvents]);
   const heroTitleParts = pageCopy.heroHeading.includes('Events')
     ? <>Our <em>Events</em></>
     : pageCopy.heroHeading;

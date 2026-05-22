@@ -1,51 +1,20 @@
-const VERSION = 'v3';
-const PAGE_PREFIX = `ova_cms_${VERSION}_page_`;
-const EVENTS_KEY = `ova_cms_${VERSION}_events`;
+/**
+ * CMS content is persisted in OVA Web MongoDB (ova_db) via /api/cms/* — not in browser storage.
+ * These helpers are no-ops kept for backward compatibility.
+ */
 
-function safeParse(raw) {
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
+export function loadCmsPageCache() {
+  return null;
 }
 
-export function loadCmsPageCache(slug) {
-  if (typeof window === 'undefined' || !slug) return null;
-  return safeParse(window.sessionStorage.getItem(`${PAGE_PREFIX}${slug}`));
-}
-
-export function saveCmsPageCache(slug, payload) {
-  if (typeof window === 'undefined' || !slug || !payload?.data) return;
-  try {
-    window.sessionStorage.setItem(
-      `${PAGE_PREFIX}${slug}`,
-      JSON.stringify({
-        data: payload.data,
-        seo: payload.seo || null,
-        updatedAt: payload.updatedAt || null,
-        fromCms: true,
-        savedAt: Date.now(),
-      })
-    );
-  } catch {
-    /* quota exceeded — ignore */
-  }
+export function saveCmsPageCache() {
+  /* server saves to MongoDB */
 }
 
 export function loadCmsEventsCache() {
-  if (typeof window === 'undefined') return null;
-  return safeParse(window.sessionStorage.getItem(EVENTS_KEY));
+  return null;
 }
 
-export function saveCmsEventsCache(events, updatedAt) {
-  if (typeof window === 'undefined' || !Array.isArray(events) || !events.length) return;
-  try {
-    window.sessionStorage.setItem(
-      EVENTS_KEY,
-      JSON.stringify({ events, updatedAt: updatedAt || null, fromCms: true, savedAt: Date.now() })
-    );
-  } catch {
-    /* ignore */
-  }
+export function saveCmsEventsCache() {
+  /* server saves to MongoDB */
 }

@@ -10,12 +10,12 @@
 
 ## Architecture
 
-| App | Port | Role |
-|-----|------|------|
-| CMS-OVA API | **5000** | `GET /api/public/content/:slug`, `/events`, etc. |
-| CMS admin | 5173 | Edit → Save draft → **Publish** |
-| OVA Web Express | **5004** | `GET /api/cms/*` → `server/lib/cmsApi.js` |
-| OVA Web Vite | **3000** | React; fetches `/api/cms/*` on **5004** only |
+| App             | Port     | Role                                             |
+| --------------- | -------- | ------------------------------------------------ |
+| CMS-OVA API     | **5000** | `GET /api/public/content/:slug`, `/events`, etc. |
+| CMS admin       | 5173     | Edit → Save draft → **Publish**                  |
+| OVA Web Express | **5004** | `GET /api/cms/*` → `server/lib/cmsApi.js`        |
+| OVA Web Vite    | **3000** | React; fetches `/api/cms/*` on **5004** only     |
 
 ```text
 Browser → localhost:3000/api/cms/content/home?cms_refresh=1
@@ -38,7 +38,6 @@ OVA_CMS_API_URL=https://larry-epicentral-boldfacedly.ngrok-free.dev
 OVA_CMS_PUBLIC_API_KEY=ova_pub_demo_sk_8f3a2b1c9d4e5f6a7b8c9d0e1f2a3b4c
 OVA_CMS_CONTENT_ENABLED=true
 OVA_CMS_CONTENT_CACHE_SECONDS=10
-OVA_CMS_LOCAL_URL=http://localhost:5000
 OVA_CMS_ASSET_URL=https://larry-epicentral-boldfacedly.ngrok-free.dev
 ```
 
@@ -53,10 +52,25 @@ Every server-side CMS request sends:
 
 ```env
 VITE_API_PROXY_TARGET=http://localhost:5004
-VITE_OVA_CMS_ASSET_URL=http://localhost:5000
 ```
 
-In dev, the client appends `cms_refresh=1` to bypass the 10s server memory cache after Publish.
+Media `/uploads/*` is proxied through OVA Web :5004 to `OVA_CMS_API_URL` (not direct to CMS port).
+
+The client appends `cms_refresh=1` on every CMS fetch to bypass the server memory cache after Publish.
+
+**Persistence:** Each successful CMS fetch is saved in **OVA Web MongoDB** (`ova_db`, collection `cmsnapshots`). On refresh, the API reads from the database if live CMS is down; when CMS is up, it fetches, updates the DB, and returns fresh data. Browser `localStorage` is not used for CMS copy.
+
+---
+
+## Troubleshooting `ERR_CONNECTION_REFUSED` on :3000
+
+Chrome often resolves `localhost` to **127.0.0.1** (IPv4). Vite without `host: true` may listen only on **`[::1]:3000`**, so `http://localhost:3000` refuses the connection.
+
+- **Fix:** `client/vite.config.js` uses `server.host: true` — **restart** Vite after updating.
+- If port 3000 is taken, Vite uses **3001** — use that port in the browser.
+- **Test API without Vite:** `http://127.0.0.1:5004/api/cms/content/home?cms_refresh=1`
+
+If the URL loads but `"fromCms": false`, CMS is not reachable — start **CMS-OVA on :5000** (and ngrok if using the ngrok URL in `.env`).
 
 ---
 
@@ -116,12 +130,12 @@ curl "http://localhost:3000/api/cms/content/home?cms_refresh=1"
 
 ## Site routes → CMS
 
-| Route | Slug | Proxy |
-|-------|------|--------|
-| `/` | `home` | `/api/cms/content/home` |
-| `/about` | `about` | `/api/cms/content/about` |
+| Route       | Slug       | Proxy                         |
+| ----------- | ---------- | ----------------------------- |
+| `/`         | `home`     | `/api/cms/content/home`       |
+| `/about`    | `about`    | `/api/cms/content/about`      |
 | `/services` | `services` | content + `/api/cms/services` |
-| `/events` | `events` | content + `/api/cms/events` |
+| `/events`   | `events`   | content + `/api/cms/events`   |
 
 Field aliases: `client/src/utils/cmsMappers.js` → `normalizeSitePageData()` (legal `body`/`contentHtml`, thankyou, contact/join heroes, FAQ items).
 
@@ -144,9 +158,19 @@ Field aliases: `client/src/utils/cmsMappers.js` → `normalizeSitePageData()` (l
 
 ---
 
+## Sync CMS → database manually
+
+```bash
+curl -X POST http://localhost:5004/api/cms/sync
+```
+
+Saves Home, About, Services, Events page copy and the events list into `ova_db`.
+
 ## Key files
 
-- `server/lib/cmsApi.js` — fetch + API key + cache
+- `server/models/CmsSnapshot.js` — MongoDB mirror of published CMS
+- `server/lib/cmsPersistence.js` — save/load + resolve live vs DB
+- `server/lib/cmsApi.js` — fetch + API key + memory cache
 - `server/routes/cmsProxy.js` — `/api/cms/*`
 - `client/src/hooks/useCms.js`
 - `client/src/utils/cmsMappers.js`

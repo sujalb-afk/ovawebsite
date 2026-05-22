@@ -67,18 +67,18 @@ const SLIDE_INTERVAL = 7000;   // ms between auto-advances
 const USER_PAUSE_DELAY = 6000; // ms to wait after dot click before resuming
 
 function Home() {
-  const { data: cmsData, seo: cmsSeo, fromCms } = useCmsPage('home');
+  const { data: cmsData, seo: cmsSeo } = useCmsPage('home');
   const [heroSlide, setHeroSlide]   = useState(0);
   const [isPaused,  setIsPaused]    = useState(false);
   const intervalRef    = useRef(null);
   const pauseResumeRef = useRef(null);
 
   const heroSlides = useMemo(() => {
-    if (fromCms && cmsData?.hero?.slides?.length) {
+    if (cmsData?.hero?.slides?.length) {
       return mapCmsHeroSlides(cmsData.hero.slides, HERO_SLIDES);
     }
     return HERO_SLIDES;
-  }, [cmsData, fromCms]);
+  }, [cmsData]);
   const programs = useMemo(() => {
     const fallback = [
       { title: 'Job Readiness & Internship Program', icon: 'bi-briefcase', to: '/services/1' },
@@ -86,11 +86,11 @@ function Home() {
       { title: 'Climate & Sustainability Education', icon: 'bi-tree', to: '/services/3' },
       { title: 'Ethical AI & Digital Literacy', icon: 'bi-cpu', to: '/services/4' },
     ];
-    if (fromCms && cmsData?.programs?.length) {
+    if (cmsData?.programs?.length) {
       return mapCmsPrograms(cmsData.programs, fallback);
     }
     return fallback;
-  }, [cmsData, fromCms]);
+  }, [cmsData]);
 
   const staticCopy = {
     programsEyebrow: 'What We Do',
@@ -108,7 +108,7 @@ function Home() {
     eventsCtaLabel: 'View All Events',
   };
   const copy = useMemo(() => {
-    if (!fromCms || !cmsData) return staticCopy;
+    if (!cmsData) return staticCopy;
     return {
       programsEyebrow: staticCopy.programsEyebrow,
       programsHeading: cmsData.programsHeading ?? staticCopy.programsHeading,
@@ -124,7 +124,7 @@ function Home() {
       eventsBody: cmsData.eventsBody ?? staticCopy.eventsBody,
       eventsCtaLabel: cmsData.eventsCtaLabel ?? staticCopy.eventsCtaLabel,
     };
-  }, [cmsData, fromCms]);
+  }, [cmsData]);
 
   const startAutoPlay = useCallback(() => {
     clearInterval(intervalRef.current);

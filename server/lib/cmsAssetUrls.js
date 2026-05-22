@@ -1,17 +1,17 @@
 /**
- * Rewrite CMS media URLs (often stored with ngrok host) to a reachable asset base.
+ * Rewrite CMS media URLs to paths the browser can load on the OVA site origin.
+ * Ngrok hosts break <img src> (no skip-browser-warning header) — use /uploads and /images paths.
  */
 
 const CMS_BASE = (process.env.OVA_CMS_API_URL || '').replace(/\/$/, '');
-const CMS_LOCAL = (process.env.OVA_CMS_LOCAL_URL || 'http://localhost:5000').replace(/\/$/, '');
 
 function getPublicAssetBase() {
-  return (process.env.OVA_CMS_ASSET_URL || CMS_BASE || CMS_LOCAL).replace(/\/$/, '');
+  return (process.env.OVA_CMS_ASSET_URL || CMS_BASE).replace(/\/$/, '');
 }
 
 function collectRewriteHosts() {
   const hosts = new Set();
-  for (const base of [CMS_BASE, CMS_LOCAL, process.env.OVA_CMS_ASSET_URL]) {
+  for (const base of [CMS_BASE, process.env.OVA_CMS_ASSET_URL]) {
     if (!base) continue;
     try {
       hosts.add(new URL(base.replace(/\/$/, '')).host);
@@ -19,18 +19,19 @@ function collectRewriteHosts() {
       /* ignore */
     }
   }
+  hosts.add('larry-epicentral-boldfacedly.ngrok-free.dev');
   return hosts;
 }
 
 const REWRITE_HOSTS = collectRewriteHosts();
 
-function rewriteUrlString(str, assetBase) {
+function rewriteUrlString(str) {
   if (!str || typeof str !== 'string') return str;
   const trimmed = str.trim();
   if (!trimmed) return str;
 
-  if (trimmed.startsWith('/uploads/')) {
-    return `${assetBase}${trimmed}`;
+  if (trimmed.startsWith('/uploads/') || trimmed.startsWith('/images/')) {
+    return trimmed;
   }
 
   if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
@@ -39,11 +40,8 @@ function rewriteUrlString(str, assetBase) {
 
   try {
     const u = new URL(trimmed);
-    if (!REWRITE_HOSTS.has(u.host)) return str;
-    if (u.pathname.startsWith('/uploads/')) {
-      return `${assetBase}${u.pathname}${u.search}`;
-    }
-    if (u.pathname.startsWith('/images/')) {
+    if (!REWRITE_HOSTS.has(u.host) && !u.host.includes('ngrok')) return str;
+    if (u.pathname.startsWith('/uploads/') || u.pathname.startsWith('/images/')) {
       return `${u.pathname}${u.search}`;
     }
     return str;
@@ -52,13 +50,13 @@ function rewriteUrlString(str, assetBase) {
   }
 }
 
-function rewriteDeep(value, assetBase) {
-  if (typeof value === 'string') return rewriteUrlString(value, assetBase);
-  if (Array.isArray(value)) return value.map((v) => rewriteDeep(v, assetBase));
+function rewriteDeep(value) {
+  if (typeof value === 'string') return rewriteUrlString(value);
+  if (Array.isArray(value)) return value.map((v) => rewriteDeep(v));
   if (value && typeof value === 'object') {
     const out = {};
     for (const [k, v] of Object.entries(value)) {
-      out[k] = rewriteDeep(v, assetBase);
+      out[k] = rewriteDeep(v);
     }
     return out;
   }

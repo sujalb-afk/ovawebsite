@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import AboutHeroBg from '../components/AboutHeroBg';
 import { getOptimizedImageUrl, cmsImageUrl } from '../utils/imageUrl';
-import { useCmsPage } from '../hooks/useCms';
+import { useCmsPage, useCmsServices } from '../hooks/useCms';
 import { mapCmsServiceCards } from '../utils/cmsMappers';
 import { stripHtml } from '../utils/cmsHtml';
 
@@ -110,18 +110,24 @@ export const SERVICES = [
 ];
 
 function Services() {
-  const { data: cmsData, seo: cmsSeo, fromCms } = useCmsPage('services');
+  const { data: cmsData, seo: cmsSeo } = useCmsPage('services');
+  const { services: cmsServiceList } = useCmsServices();
   const services = useMemo(() => {
-    if (fromCms && cmsData?.cards?.length) return mapCmsServiceCards(cmsData.cards, SERVICES);
+    if (cmsData?.cards?.length) {
+      return mapCmsServiceCards(cmsData.cards, SERVICES);
+    }
+    if (cmsServiceList?.length) {
+      return mapCmsServiceCards(cmsServiceList, SERVICES);
+    }
     return SERVICES;
-  }, [cmsData, fromCms]);
-  const heroQuote = fromCms && cmsData?.heroQuote
+  }, [cmsData, cmsServiceList]);
+  const heroQuote = cmsData?.heroQuote
     ? stripHtml(cmsData.heroQuote)
     : 'Four programmes that create real impact: climate education, career readiness, community outreach, and digital literacy.';
-  const ctaHeading = fromCms && cmsData?.cta?.heading
+  const ctaHeading = cmsData?.cta?.heading
     ? cmsData.cta.heading
     : 'Ready to Make a Difference?';
-  const ctaBody = fromCms && cmsData?.cta?.body
+  const ctaBody = cmsData?.cta?.body
     ? cmsData.cta.body
     : 'Every contribution, big or small, helps communities in need. Join OVA™ today.';
 

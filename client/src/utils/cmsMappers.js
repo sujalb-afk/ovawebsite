@@ -19,6 +19,86 @@ const SERVICE_ICONS = {
 
 const DEFAULT_EVENT_TAG_ICON = 'bi-calendar-event';
 
+/** Preserve hero `<em>` styling: CMS may send headlineParts, highlight field, or *markers* in heading. */
+export function mapCmsHeadlineParts(slide, fallbackParts = []) {
+  const base = Array.isArray(fallbackParts) ? fallbackParts : [];
+
+  if (Array.isArray(slide?.headlineParts) && slide.headlineParts.length) {
+    return slide.headlineParts.map((part) => {
+      if (typeof part === 'string') return part;
+      if (part && typeof part === 'object') {
+        const em = part.em || part.highlight || part.text || '';
+        return em ? { em: String(em) } : '';
+      }
+      return '';
+    }).filter((p) => p !== '');
+  }
+
+  const heading = (slide?.heading || slide?.title || '').trim();
+  const highlight = (
+    slide?.headingHighlight
+    || slide?.highlight
+    || slide?.headingEm
+    || slide?.em
+    || ''
+  ).trim();
+
+  if (!heading) return base;
+
+  if (highlight) {
+    const idx = heading.toLowerCase().indexOf(highlight.toLowerCase());
+    if (idx >= 0) {
+      const parts = [];
+      const before = heading.slice(0, idx);
+      const emText = heading.slice(idx, idx + highlight.length);
+      const after = heading.slice(idx + highlight.length);
+      if (before) parts.push(before);
+      parts.push({ em: emText });
+      if (after) parts.push(after);
+      return parts.length ? parts : base;
+    }
+  }
+
+  const markerMatch = heading.match(/\*\*([^*]+)\*\*/) || heading.match(/\*([^*]+)\*/);
+  if (markerMatch) {
+    const idx = heading.indexOf(markerMatch[0]);
+    const parts = [];
+    const before = heading.slice(0, idx);
+    const after = heading.slice(idx + markerMatch[0].length);
+    if (before) parts.push(before);
+    parts.push({ em: markerMatch[1] });
+    if (after) parts.push(after);
+    return parts.length ? parts : base;
+  }
+
+  const emEntry = base.find((p) => typeof p === 'object' && p.em);
+  if (emEntry?.em) {
+    const idx = heading.toLowerCase().indexOf(String(emEntry.em).toLowerCase());
+    if (idx >= 0) {
+      const parts = [];
+      const before = heading.slice(0, idx);
+      const emText = heading.slice(idx, idx + emEntry.em.length);
+      const after = heading.slice(idx + emEntry.em.length);
+      if (before) parts.push(before);
+      parts.push({ em: emText });
+      if (after) parts.push(after);
+      return parts;
+    }
+    const emWordCount = String(emEntry.em).trim().split(/\s+/).filter(Boolean).length;
+    const words = heading.split(/\s+/).filter(Boolean);
+    if (emWordCount > 0 && words.length > emWordCount) {
+      const emText = words.slice(-emWordCount).join(' ');
+      const before = words.slice(0, -emWordCount).join(' ');
+      const parts = [];
+      if (before) parts.push(`${before} `);
+      parts.push({ em: emText });
+      return parts;
+    }
+  }
+
+  return [heading];
+}
+
 function formatEventDate(ev) {
   if (ev.dateLabel) return ev.dateLabel;
   if (ev.date) {
@@ -41,13 +121,13 @@ export function mapCmsHeroSlides(cmsSlides, fallbackSlides) {
 
   return slides.map((slide, i) => {
     const base = fallbackSlides[i] || fallbackSlides[0] || {};
-    const heading = (slide.heading || slide.title || '').trim();
     return {
       ...base,
       image: pickImage(slide) || base.image,
-      eyebrow: slide.eyebrow || slide.subheading || base.eyebrow,
-      headlineParts: heading ? [heading] : base.headlineParts,
-      subtext: slide.subheading || slide.body || slide.subtext || base.subtext,
+      eyebrow: (slide.eyebrow || slide.kicker || base.eyebrow || '').trim() || base.eyebrow,
+      headlineParts: mapCmsHeadlineParts(slide, base.headlineParts),
+      subtext: (slide.body || slide.subtext || slide.description || base.subtext || '').trim() || base.subtext,
+      tags: slide.tags ?? base.tags,
       btns: Array.isArray(slide.cta) && slide.cta.length
         ? slide.cta.map((c) => ({
             label: c.label || c.text || 'Learn more',
