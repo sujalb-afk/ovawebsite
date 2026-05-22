@@ -1,5 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { loadCmsPageCache, saveCmsPageCache, loadCmsEventsCache, saveCmsEventsCache } from '../utils/cmsStorage';
+import { setCmsAssetBase } from '../utils/imageUrl';
+import { normalizeSitePageData } from '../utils/cmsMappers';
 
 const apiBase = import.meta.env.VITE_API_URL || import.meta.env.REACT_APP_API_URL || '';
 /** Match server OVA_CMS_CONTENT_CACHE_SECONDS — refetch so Publish updates appear */
@@ -17,6 +19,7 @@ function checkCmsEnabled() {
   if (cmsEnabledConfirmed) return Promise.resolve(true);
   return cmsFetch('/status', 2)
     .then((j) => {
+      if (j?.assetBaseUrl) setCmsAssetBase(j.assetBaseUrl);
       const enabled = Boolean(j?.enabled);
       if (enabled) cmsEnabledConfirmed = true;
       return enabled;
@@ -24,8 +27,14 @@ function checkCmsEnabled() {
     .catch(() => false);
 }
 
+function cmsPathWithRefresh(path) {
+  if (!import.meta.env.DEV) return path;
+  const sep = path.includes('?') ? '&' : '?';
+  return `${path}${sep}cms_refresh=1`;
+}
+
 async function cmsFetch(path, attempts = 3) {
-  const url = `${apiBase}/api/cms${path}`;
+  const url = `${apiBase}/api/cms${cmsPathWithRefresh(path)}`;
   for (let i = 0; i < attempts; i += 1) {
     try {
       const res = await fetch(url, {
@@ -54,15 +63,16 @@ function cmsVersionChanged(cachedAt, apiAt) {
 
 function applyPageJson(json, slug, cached) {
   if (json?.ok && json.data) {
+    const data = normalizeSitePageData(slug, json.data, json.title);
     const changed = cmsVersionChanged(cached?.updatedAt, json.updatedAt);
     saveCmsPageCache(slug, {
-      data: json.data,
+      data,
       seo: json.seo,
       updatedAt: json.updatedAt,
     });
     return {
       loading: false,
-      data: json.data,
+      data,
       seo: json.seo || null,
       fromCms: true,
       stale: Boolean(json.stale),

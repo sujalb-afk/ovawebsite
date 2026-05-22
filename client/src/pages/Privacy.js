@@ -28,8 +28,8 @@ function Privacy() {
 
       <div className="legal-content">
         <div className="legal-content-inner">
-          {fromCms && cmsData?.body ? (
-            <div dangerouslySetInnerHTML={{ __html: cmsData.body }} />
+          {fromCms && (cmsData?.body || cmsData?.contentHtml) ? (
+            <div dangerouslySetInnerHTML={{ __html: cmsData.body || cmsData.contentHtml }} />
           ) : (
             <>
               <p className="legal-lead">

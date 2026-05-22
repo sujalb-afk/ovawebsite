@@ -36,6 +36,15 @@ const INITIAL_CONTACT_FORM = {
 
 function Contact() {
   const { data: cmsData, seo: cmsSeo, fromCms } = useCmsPage('contact');
+  const faqList =
+    fromCms && Array.isArray(cmsData?.faqItems) && cmsData.faqItems.length
+      ? cmsData.faqItems
+      : fromCms && Array.isArray(cmsData?.faqs) && cmsData.faqs.length
+        ? cmsData.faqs.map((item) => ({
+            q: item.q || item.question || '',
+            a: item.a || item.answer || '',
+          }))
+        : FAQ_ITEMS;
   const recaptchaRef = useRef(null);
   const submitWrapRef = useRef(null);
   const [recaptchaReady, setRecaptchaReady] = useState(false);
@@ -310,7 +319,7 @@ function Contact() {
             <div className="d-section-line d-faq-line" />
           </div>
           <div className="d-faq-accordion">
-            {FAQ_ITEMS.map((item, idx) => (
+            {faqList.map((item, idx) => (
               <div
                 key={idx}
                 className={`d-faq-accordion-item ${faqOpenIndex === idx ? 'd-faq-accordion-item--open' : ''}`}

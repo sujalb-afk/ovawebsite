@@ -165,3 +165,48 @@ export function normalizeEventsPageCopy(data, defaults) {
     listSubtitle: d.listSubtitle || defaults.listSubtitle,
   };
 }
+
+/** Align CMS API fields with what OVA_Web page components read (legal, contact, thankyou, etc.). */
+export function normalizeSitePageData(slug, data, title = '') {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    return data && typeof data === 'object' ? data : {};
+  }
+  const out = { ...data };
+  const pageTitle = (title || '').trim();
+  const firstSection =
+    Array.isArray(out.sections) && out.sections[0] && typeof out.sections[0] === 'object'
+      ? out.sections[0]
+      : null;
+
+  if (slug === 'terms' || slug === 'privacy' || slug === 'refund') {
+    const html = (out.contentHtml || '').trim();
+    if (html && !out.body) out.body = out.contentHtml;
+    if (!out.heroHeading && pageTitle) out.heroHeading = pageTitle;
+    if (!out.heroSubtext && out.introLead) out.heroSubtext = out.introLead;
+    else if (!out.heroSubtext && out.lead) out.heroSubtext = out.lead;
+  }
+
+  if (slug === 'thankyou') {
+    if (!out.heroHeading && out.heading) out.heroHeading = out.heading;
+    if (!out.heroSubtext && out.message) out.heroSubtext = out.message;
+  }
+
+  if (slug === 'contact' || slug === 'join') {
+    if (firstSection) {
+      if (!out.heroHeading && firstSection.heading) out.heroHeading = firstSection.heading;
+      if (!out.heroSubtext && firstSection.body) out.heroSubtext = firstSection.body;
+    }
+  }
+
+  if (slug === 'contact') {
+    if (!out.mapHeading && out.mapTitle) out.mapHeading = out.mapTitle;
+    if (Array.isArray(out.faqs) && out.faqs.length && !out.faqItems?.length) {
+      out.faqItems = out.faqs.map((item) => ({
+        q: item.q || item.question || '',
+        a: item.a || item.answer || '',
+      }));
+    }
+  }
+
+  return out;
+}

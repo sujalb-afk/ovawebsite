@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import AboutHeroBg from '../components/AboutHeroBg';
-import { getOptimizedImageUrl, cmsImageUrl } from '../utils/imageUrl';
+import { getOptimizedImageUrl, cmsImageUrl, cmsImageFallback } from '../utils/imageUrl';
 import { useCmsPage, useCmsEvents } from '../hooks/useCms';
 import { mapCmsEventToCard, normalizeEventsPageCopy } from '../utils/cmsMappers';
 import { stripHtml } from '../utils/cmsHtml';
@@ -175,7 +175,22 @@ function Events() {
               <article key={ev.id} className="ev-card-v">
                 <div className="ev-card-v-img-wrap">
                   {ev.image ? (
-                    <img src={getOptimizedImageUrl(cmsImageUrl(ev.image))} alt={ev.title} className="ev-card-v-img" width={400} height={300} loading="lazy" decoding="async" />
+                    <img
+                      src={getOptimizedImageUrl(cmsImageUrl(ev.image))}
+                      alt={ev.title}
+                      className="ev-card-v-img"
+                      width={400}
+                      height={300}
+                      loading="lazy"
+                      decoding="async"
+                      onError={(e) => {
+                        const fallback = cmsImageFallback(ev.image);
+                        if (fallback && e.target.src !== fallback) {
+                          e.target.src = fallback;
+                          e.target.onerror = null;
+                        }
+                      }}
+                    />
                   ) : (
                     <div className="ev-card-v-placeholder" aria-label="Image coming soon">
                       <i className="bi bi-camera ev-card-v-placeholder-icon" aria-hidden="true" />

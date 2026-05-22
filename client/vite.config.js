@@ -5,6 +5,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   // OVA Web backend (CMS proxy /api/cms/*). CMS-OVA runs on :5000 — do not proxy there.
   const apiTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:5004';
+  const cmsAssetTarget = env.VITE_OVA_CMS_ASSET_URL || 'http://localhost:5000';
 
   return {
   plugins: [react()],
@@ -26,6 +27,10 @@ export default defineConfig(({ mode }) => {
     proxy: {
       '/api': {
         target: apiTarget,
+        changeOrigin: true,
+      },
+      '/uploads': {
+        target: cmsAssetTarget,
         changeOrigin: true,
       },
     },

@@ -23,3 +23,5 @@ Shared UI used by the four pages (e.g. Navbar, Footer, App routing, global style
 4. Charity services to the underprivileged rural students
 
 **Design guidance:** When changing copy, layout, or structure on the four pages, follow the project design guide at `docs/OVA_WEBSITE_DESIGN_GUIDE.md` so the site looks and reads like a clear, trustworthy NGO site for these focus areas.
+
+**CMS integration:** Published copy comes from CMS-OVA `:5000` via OVA Web `:5004` (`/api/cms/*`). The React app must never call CMS `:5000` for page JSON—only Vite → `:5004`. See `docs/CMS_INTEGRATION.md`. Do not change CMS-OVA API routes or response shapes.

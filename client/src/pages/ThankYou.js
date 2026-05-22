@@ -18,9 +18,9 @@ function ThankYou() {
         <section className="d-section d-section-white thank-you-section">
           <div className="thank-you-content">
             <div style={{ fontSize: 48, marginBottom: 16 }} aria-hidden="true">✓</div>
-            <h1 style={{ marginBottom: 12 }}>{fromCms && cmsData?.heroHeading ? cmsData.heroHeading : 'Thank You for Your Donation'}</h1>
+            <h1 style={{ marginBottom: 12 }}>{fromCms && (cmsData?.heroHeading || cmsData?.heading) ? (cmsData.heroHeading || cmsData.heading) : 'Thank You for Your Donation'}</h1>
             <p style={{ color: "#555", marginBottom: 24 }}>
-              {fromCms && cmsData?.heroSubtext ? stripHtml(cmsData.heroSubtext) : 'Your payment was successful. A confirmation and receipt will be sent to your email shortly. OVA™ will process your receipt and 80G certificate as per your details.'}
+              {fromCms && (cmsData?.heroSubtext || cmsData?.message) ? stripHtml(cmsData.heroSubtext || cmsData.message) : 'Your payment was successful. A confirmation and receipt will be sent to your email shortly. OVA™ will process your receipt and 80G certificate as per your details.'}
             </p>
             <p style={{ color: "#777", fontSize: 14, marginBottom: 24 }}>
               If you don&apos;t receive the receipt email within a few minutes, please check your spam folder or contact us.

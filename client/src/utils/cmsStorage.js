@@ -1,4 +1,4 @@
-const VERSION = 'v1';
+const VERSION = 'v3';
 const PAGE_PREFIX = `ova_cms_${VERSION}_page_`;
 const EVENTS_KEY = `ova_cms_${VERSION}_events`;
 
