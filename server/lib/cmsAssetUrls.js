@@ -6,7 +6,7 @@ const CMS_BASE = (process.env.OVA_CMS_API_URL || '').replace(/\/$/, '');
 const CMS_LOCAL = (process.env.OVA_CMS_LOCAL_URL || 'http://localhost:5000').replace(/\/$/, '');
 
 function getPublicAssetBase() {
-  return (process.env.OVA_CMS_ASSET_URL || CMS_LOCAL || CMS_BASE).replace(/\/$/, '');
+  return (process.env.OVA_CMS_ASSET_URL || CMS_BASE || CMS_LOCAL).replace(/\/$/, '');
 }
 
 function collectRewriteHosts() {
