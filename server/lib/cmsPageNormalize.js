@@ -91,8 +91,101 @@ function normalizeSitePageData(slug, data, title = '') {
   return out;
 }
 
+const SOCIAL_ICON_BY_LABEL = {
+  facebook: 'bi-facebook',
+  instagram: 'bi-instagram',
+  linkedin: 'bi-linkedin',
+  youtube: 'bi-youtube',
+};
+
+function mapNavbarLink(item, index) {
+  if (!item || typeof item !== 'object') return null;
+  if (item.type === 'dropdown' || Array.isArray(item.items)) {
+    const label = (item.label || '').trim();
+    const key =
+      item.key
+      || (label.toLowerCase() === 'about' ? 'about' : label.toLowerCase() === 'events' ? 'events' : `dropdown-${index}`);
+    return {
+      type: 'dropdown',
+      key,
+      label,
+      icon: item.icon || 'bi-chevron-down',
+      items: (item.items || []).map((sub) => ({
+        path: sub.path || sub.to || '/',
+        label: sub.label || '',
+      })),
+    };
+  }
+  return {
+    type: 'link',
+    path: item.path || item.to || '/',
+    label: item.label || '',
+    icon: item.icon || 'bi-link',
+  };
+}
+
+/** Map CMS-OVA global payload (navbar, footer, site_settings) → Navbar/Footer props. */
+function normalizeCmsGlobal(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const g = { ...raw };
+  const navbar = g.navbar && typeof g.navbar === 'object' ? g.navbar : {};
+  const footer = g.footer && typeof g.footer === 'object' ? g.footer : {};
+
+  if ((!g.navItems || !g.navItems.length) && Array.isArray(navbar.links) && navbar.links.length) {
+    g.navItems = navbar.links.map(mapNavbarLink).filter(Boolean);
+  }
+  if (navbar.donateLabel) g.donateLabel = navbar.donateLabel;
+  if (navbar.connectLabel) g.connectLabel = navbar.connectLabel;
+
+  if (!g.address && footer.contactAddress) g.address = footer.contactAddress;
+  if (!g.phone && footer.contactPhone) g.phone = footer.contactPhone;
+  if (!g.email && footer.contactEmail) g.email = footer.contactEmail;
+  if (!g.footerAbout && footer.aboutText) g.footerAbout = footer.aboutText;
+  if (!g.footerAboutHeading && footer.aboutHeading) g.footerAboutHeading = footer.aboutHeading;
+  if (!g.contactHeading && footer.contactHeading) g.contactHeading = footer.contactHeading;
+  if (!g.newsletterHeading && footer.newsletterHeading) g.newsletterHeading = footer.newsletterHeading;
+  if (!g.newsletterText && footer.newsletterText) g.newsletterText = footer.newsletterText;
+
+  const socialSource = Array.isArray(g.socials) && g.socials.length ? g.socials : footer.socials;
+  if (Array.isArray(socialSource) && socialSource.length) {
+    g.socials = socialSource.map((s) => {
+      const label = (s.label || '').toLowerCase();
+      let icon = s.icon;
+      if (!icon) {
+        for (const [name, bi] of Object.entries(SOCIAL_ICON_BY_LABEL)) {
+          if (label.includes(name)) {
+            icon = bi;
+            break;
+          }
+        }
+      }
+      return {
+        ...s,
+        icon: icon || 'bi-globe',
+        href: s.href || s.url || '#',
+        label: s.label || '',
+      };
+    });
+  }
+
+  return g;
+}
+
+function extractGlobalFromCmsJson(json) {
+  if (!json || typeof json !== 'object') return null;
+  if (json.global && typeof json.global === 'object' && Object.keys(json.global).length) {
+    return json.global;
+  }
+  if (json.page?.data && typeof json.page.data === 'object' && Object.keys(json.page.data).length) {
+    return json.page.data;
+  }
+  return null;
+}
+
 module.exports = {
   normalizeSitePageData,
+  normalizeCmsGlobal,
+  extractGlobalFromCmsJson,
   flattenNestedSections,
   firstSection,
 };

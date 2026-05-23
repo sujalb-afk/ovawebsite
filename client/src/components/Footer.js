@@ -29,12 +29,16 @@ const Footer = React.memo(function Footer() {
     return () => obs.disconnect();
   }, []);
 
-  const { global: cmsGlobal, fromCms } = useCmsGlobal();
-  const address = fromCms && cmsGlobal?.address ? cmsGlobal.address : 'Chavan-dafale colony, Uchgaon,\nKolhapur, Maharashtra 416005';
-  const phone = fromCms && cmsGlobal?.phone ? cmsGlobal.phone : '+91 8080677811';
-  const emailAddr = fromCms && cmsGlobal?.email ? cmsGlobal.email : 'support@ova.ngo';
-  const aboutText = fromCms && cmsGlobal?.footerAbout ? cmsGlobal.footerAbout : 'is an NGO that uses technology to support volunteerism and community work. We run programs on sustainability, job readiness, and digital literacy.';
-  const socials = fromCms && cmsGlobal?.socials ? cmsGlobal.socials : SOCIAL;
+  const { global: cmsGlobal } = useCmsGlobal();
+  const address = cmsGlobal?.address || 'Chavan-dafale colony, Uchgaon,\nKolhapur, Maharashtra 416005';
+  const phone = cmsGlobal?.phone || '+91 8080677811';
+  const emailAddr = cmsGlobal?.email || 'support@ova.ngo';
+  const aboutHeading = cmsGlobal?.footerAboutHeading || 'About Us';
+  const aboutText = cmsGlobal?.footerAbout || 'is an NGO that uses technology to support volunteerism and community work. We run programs on sustainability, job readiness, and digital literacy.';
+  const contactHeading = cmsGlobal?.contactHeading || 'Contact';
+  const newsletterHeading = cmsGlobal?.newsletterHeading || 'Stay Updated';
+  const newsletterText = cmsGlobal?.newsletterText || 'Subscribe to our newsletter for the latest updates, events, and impact stories.';
+  const socials = cmsGlobal?.socials?.length ? cmsGlobal.socials : SOCIAL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,8 +70,8 @@ const Footer = React.memo(function Footer() {
         {/* 1. About Us + OVA™ info – same column structure as Contact / Stay Updated */}
         <div className="footer-col footer-col-brand">
           <h5 className="footer-col-heading">
-            <Link to="/about" className="footer-col-heading-link" aria-label="About Us">
-              About Us
+            <Link to="/about" className="footer-col-heading-link" aria-label={aboutHeading}>
+              {aboutHeading}
             </Link>
           </h5>
           <p className="footer-about-text">
@@ -82,7 +86,7 @@ const Footer = React.memo(function Footer() {
 
         {/* 2. Contact (center) */}
         <div className="footer-col footer-col-contact">
-          <h5 className="footer-col-heading">Contact</h5>
+          <h5 className="footer-col-heading">{contactHeading}</h5>
           <ul className="footer-contact-list">
             <li>
               <i className="bi bi-geo-alt" aria-hidden="true" />
@@ -115,9 +119,9 @@ const Footer = React.memo(function Footer() {
 
         {/* 3. Newsletter (Stay Updated) – right */}
         <div className="footer-col footer-col-newsletter">
-          <h5 className="footer-col-heading">Stay Updated</h5>
+          <h5 className="footer-col-heading">{newsletterHeading}</h5>
           <p className="footer-newsletter-desc">
-            Subscribe to our newsletter for the latest updates, events, and impact stories.
+            {newsletterText}
           </p>
           <form onSubmit={handleSubmit} className="footer-newsletter-form" autoComplete="off">
             <input

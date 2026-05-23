@@ -22,6 +22,10 @@ Browser → localhost:3000/api/cms/content/home?cms_refresh=1
         → OVA Web :5004 (cmsProxy)
         → CMS GET /api/public/content/home?locale=en&api_key=...
         → { ok, fromCms, data } → useCmsPage()
+
+Navbar/Footer → GET /api/cms/global?cms_refresh=1
+        → CMS GET /api/public/global?locale=en (alias of /content/global)
+        → normalizeCmsGlobal() → navbar.links, footer.*, site_settings
 ```
 
 **Never** point `VITE_API_PROXY_TARGET` at CMS port 5000.
@@ -140,7 +144,7 @@ curl "http://localhost:3000/api/cms/content/home?cms_refresh=1"
 | `/donate`   | `donate`   | `/api/cms/content/donate`     |
 | `/contact`  | `contact`  | `/api/cms/content/contact`    |
 
-Field aliases: `client/src/utils/cmsMappers.js` + `server/lib/cmsPageNormalize.js` → `normalizeSitePageData()` (home `sections.*`, about `heroHeading`/`heroQuote`, donate `quote`/`taxCard`, contact/join `sections[]`, FAQ items). DB sync includes these slugs via `POST /api/cms/sync`.
+Field aliases: `client/src/utils/cmsMappers.js` + `server/lib/cmsPageNormalize.js` → `normalizeSitePageData()` (home `sections.*`, about `heroHeading`/`heroQuote`, donate `quote`/`taxCard`, contact/join `sections[]`, FAQ items) and `normalizeCmsGlobal()` (`navbar.links` → `navItems`, `footer.contact*` → address/phone/email, `site_settings` logos/favicon). DB sync includes page slugs via `POST /api/cms/sync`; global is saved on every successful `/api/cms/global` fetch.
 
 ---
 

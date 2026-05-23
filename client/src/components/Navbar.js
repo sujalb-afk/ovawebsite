@@ -59,7 +59,9 @@ function Navbar() {
   const [onHero, setOnHero] = useState(false);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT);
   const location = useLocation();
-  const { global: cmsGlobal, fromCms } = useCmsGlobal();
+  const { global: cmsGlobal } = useCmsGlobal();
+  const navItems = cmsGlobal?.navItems?.length ? cmsGlobal.navItems : NAV_ITEMS;
+  const donateLabel = cmsGlobal?.donateLabel || 'Donate Now';
 
   const isHome = location.pathname === '/';
   const isDonatePage = location.pathname === '/donate';
@@ -154,7 +156,7 @@ function Navbar() {
 
           {/* ── Nav list ── */}
           <ul className="navbar-nav-updated">
-            {(fromCms && cmsGlobal?.navItems ? cmsGlobal.navItems : NAV_ITEMS).map((item) => {
+            {navItems.map((item) => {
               if (item.type === 'dropdown') {
                 const isActiveDropdown = item.key === 'about' ? isAboutActive() : isEventsActive();
                 const isOpenThis = openDropdown === item.key;
@@ -220,7 +222,7 @@ function Navbar() {
               to={donateTo}
               onClick={() => setIsOpen(false)}
             >
-              Donate Now
+              {donateLabel}
             </Link>
           </div>
         </div>
@@ -237,7 +239,7 @@ function Navbar() {
             OVA Connect
           </a>
           <Link className="btn-nav-donate-updated" to={donateTo} onClick={() => setIsOpen(false)}>
-            Donate Now
+            {donateLabel}
           </Link>
         </div>
 

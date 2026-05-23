@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { normalizeSitePageData } from '../utils/cmsMappers';
+import { normalizeSitePageData, normalizeCmsGlobal } from '../utils/cmsMappers';
 import { rewriteCmsMediaDeep } from '../utils/cmsMediaUrls';
 
 const apiBase = import.meta.env.VITE_API_URL || import.meta.env.REACT_APP_API_URL || '';
@@ -338,10 +338,11 @@ export function useCmsGlobal() {
       if (cancelled) return;
 
       if (json?.ok && json.global) {
+        const global = normalizeCmsGlobal(rewriteCmsMediaDeep(json.global));
         setState({
           loading: false,
-          global: rewriteCmsMediaDeep(json.global),
-          fromCms: true,
+          global,
+          fromCms: Boolean(global),
           stale: Boolean(json.stale || json.fromDb),
           fromDb: Boolean(json.fromDb),
         });

@@ -3,7 +3,11 @@
  * Reads published content only (/api/public/*). Does not touch form-transfer routes.
  */
 
-const { normalizeSitePageData: normalizeCmsPageData } = require("./cmsPageNormalize");
+const {
+  normalizeSitePageData: normalizeCmsPageData,
+  normalizeCmsGlobal,
+  extractGlobalFromCmsJson,
+} = require("./cmsPageNormalize");
 
 const CMS_BASE = (process.env.OVA_CMS_API_URL || "").replace(/\/$/, "");
 const CMS_API_KEY = (process.env.OVA_CMS_PUBLIC_API_KEY || "").trim();
@@ -266,11 +270,19 @@ async function fetchCmsPage(slug, options = {}) {
 }
 
 async function fetchCmsGlobal(options = {}) {
-  const data = await fetchCms("/content/global?locale=en", options);
-  if (data?.global && Object.keys(data.global).length) return data.global;
-  if (data?.page?.data && Object.keys(data.page.data).length) return data.page.data;
+  const paths = ["/global?locale=en", "/content/global?locale=en"];
+  for (const path of paths) {
+    const data = await fetchCms(path, options);
+    const raw = extractGlobalFromCmsJson(data);
+    if (raw && Object.keys(raw).length) {
+      return normalizeCmsGlobal(raw);
+    }
+  }
   const home = await fetchCms("/content/home?locale=en", options);
-  if (home?.global && Object.keys(home.global).length) return home.global;
+  const fromHome = extractGlobalFromCmsJson(home) || home?.page?.data?.global;
+  if (fromHome && typeof fromHome === "object" && Object.keys(fromHome).length) {
+    return normalizeCmsGlobal(fromHome);
+  }
   return null;
 }
 
@@ -353,4 +365,5 @@ module.exports = {
   isCmsEnabled,
   clearCmsMemoryCache,
   normalizeCmsPageData,
+  normalizeCmsGlobal,
 };
