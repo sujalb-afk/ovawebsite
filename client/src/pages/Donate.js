@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import SEO from "../components/SEO";
@@ -6,12 +6,36 @@ import AboutHeroBg from "../components/AboutHeroBg";
 import { loadRazorpayScript, openRazorpayCheckout } from "../utils/razorpay";
 import { taxinfo } from "../data/taxinfo";
 import { useCmsPage } from "../hooks/useCms";
-import { stripHtml } from "../utils/cmsHtml";
+import { mapCmsFaqs, mapCmsTaxCard } from "../utils/cmsMappers";
+import { stripHtml, CmsHtml } from "../utils/cmsHtml";
 
 const apiBase = import.meta.env.VITE_API_URL || import.meta.env.REACT_APP_API_URL || '';
 
+const DONATE_FAQS = [
+  {
+    q: "How can I make a donation to OVA™?",
+    a: "You can make a donation by transferring funds to our SBI FCRA Account. Please follow the details provided in the Donor Details section on our website.",
+  },
+  {
+    q: "Can I donate anonymously?",
+    a: "We do not encourage anonymous donations as a policy. Donor details are mandatory for processing and to send the Cash Receipt.",
+  },
+  {
+    q: "Will I receive a receipt for my donation?",
+    a: "Yes. A soft copy of the Cash Receipt will be sent to your registered email. Provide your PAN to receive the 80G certificate.",
+  },
+];
+
 function Donate() {
-  const { data: cmsData, seo: cmsSeo, fromCms } = useCmsPage('donate');
+  const { data: cmsData, seo: cmsSeo } = useCmsPage('donate');
+  const taxContent = useMemo(
+    () => mapCmsTaxCard(cmsData?.taxCard, taxinfo),
+    [cmsData?.taxCard]
+  );
+  const faqs = useMemo(
+    () => (cmsData?.faqs?.length ? mapCmsFaqs(cmsData.faqs, DONATE_FAQS) : DONATE_FAQS),
+    [cmsData?.faqs]
+  );
   const location = useLocation();
   const navigate = useNavigate();
   const [feedAmountType, setFeedAmountType] = useState("preset");
@@ -41,21 +65,6 @@ function Donate() {
     { amount: 13500, children: 9 },
     { amount: 18000, children: 12 },
     { amount: 22500, children: 15 },
-  ];
-
-  const faqs = [
-    {
-      q: "How can I make a donation to OVA™?",
-      a: "You can make a donation by transferring funds to our SBI FCRA Account. Please follow the details provided in the Donor Details section on our website.",
-    },
-    {
-      q: "Can I donate anonymously?",
-      a: "We do not encourage anonymous donations as a policy. Donor details are mandatory for processing and to send the Cash Receipt.",
-    },
-    {
-      q: "Will I receive a receipt for my donation?",
-      a: "Yes. A soft copy of the Cash Receipt will be sent to your registered email. Provide your PAN to receive the 80G certificate.",
-    },
   ];
 
   const donorInfoItems = [
@@ -202,13 +211,13 @@ function Donate() {
           <div className="container about-hero-container">
             <div className="about-hero-content donate-hero-content">
               <p className="donate-hero-eyebrow">Every gift counts</p>
-              <h1 className="about-hero-title">{fromCms && cmsData?.heroHeading ? cmsData.heroHeading : <>Donate to<br /><em>Create Impact</em></>}</h1>
+              <h1 className="about-hero-title">{cmsData?.heroHeading ? cmsData.heroHeading : <>Donate to<br /><em>Create Impact</em></>}</h1>
               <blockquote className="donate-hero-quote">
-                {fromCms && cmsData?.heroSubtext ? stripHtml(cmsData.heroSubtext) : 'We make a living by what we get. We make a life by what we give.'}
-                <cite>, Winston Churchill</cite>
+                {cmsData?.heroSubtext ? stripHtml(cmsData.heroSubtext) : 'We make a living by what we get. We make a life by what we give.'}
+                <cite>, {cmsData?.heroQuoteAuthor || 'Winston Churchill'}</cite>
               </blockquote>
               <button type="button" onClick={scrollToDonateForm} className="donate-hero-cta">
-                {fromCms && cmsData?.heroCtaLabel ? cmsData.heroCtaLabel : 'Donate Now'}
+                {cmsData?.heroCtaLabel || 'Donate Now'}
               </button>
             </div>
           </div>
@@ -220,14 +229,14 @@ function Donate() {
             <div className="d-donate-left">
               <div className="d-tax-card d-tax-card-in-form">
                 <div className="d-section-header d-tax-content">
-                  <h2>{taxinfo.title}</h2>
+                  <h2>{taxContent.title}</h2>
                   <div className="d-tax-paras">
-                    {taxinfo.paragraphs.map((text, i) => (
+                    {taxContent.paragraphs.map((text, i) => (
                       <p key={i} className="d-tax-para">{text}</p>
                     ))}
                   </div>
                   <ul className="d-tax-partners-list d-tax-partners-list--contact-style">
-                    {taxinfo.implementingPartners.map((item, i) => (
+                    {taxContent.implementingPartners.map((item, i) => (
                       <li key={i} className="d-tax-partner-item">
                         {typeof item === 'string' ? (
                           item
@@ -461,9 +470,15 @@ function Donate() {
         {/* Bank Account Details – after form */}
         <section className="d-section d-section-grey d-bank-section" id="bank-details">
           <div className="d-section-header d-bank-section-header">
-            <h2>Bank Account Details</h2>
+            <h2>{cmsData?.bankHeading || 'Bank Account Details'}</h2>
             <p className="d-bank-intro">
-              Transfer funds to our SBI FCRA Account using the details below. For 80G certificate, enter your PAN in the donation form and send the mandatory details to <a href="mailto:support@ova.ngo">support@ova.ngo</a> after your donation.
+              {cmsData?.bankBody ? (
+                <CmsHtml html={cmsData.bankBody} />
+              ) : (
+                <>
+                  Transfer funds to our SBI FCRA Account using the details below. For 80G certificate, enter your PAN in the donation form and send the mandatory details to <a href="mailto:support@ova.ngo">support@ova.ngo</a> after your donation.
+                </>
+              )}
             </p>
             <div className="d-section-line" />
           </div>

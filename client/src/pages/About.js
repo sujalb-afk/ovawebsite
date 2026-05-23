@@ -81,12 +81,16 @@ function About() {
         <div className="about-hero-overlay donate-hero-overlay" aria-hidden="true" />
         <div className="container about-hero-container">
           <div className="about-hero-content donate-hero-content">
-            <h1 className="about-hero-title">About <em>Us</em></h1>
+            <h1 className="about-hero-title">
+              {cmsData?.heroHeading ? cmsData.heroHeading : <>About <em>Us</em></>}
+            </h1>
             <blockquote className="donate-hero-quote">
               {heroQuote}
               <cite>, {heroCtaLabel ? heroCtaLabel : <OvaBrand />}</cite>
             </blockquote>
-            <Link to="/services" className="donate-hero-cta">Our Programmes</Link>
+            <Link to="/services" className="donate-hero-cta">
+              {cmsData?.heroButtonLabel || 'Our Programmes'}
+            </Link>
           </div>
         </div>
       </section>

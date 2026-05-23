@@ -136,8 +136,11 @@ curl "http://localhost:3000/api/cms/content/home?cms_refresh=1"
 | `/about`    | `about`    | `/api/cms/content/about`      |
 | `/services` | `services` | content + `/api/cms/services` |
 | `/events`   | `events`   | content + `/api/cms/events`   |
+| `/join`     | `join`     | `/api/cms/content/join`       |
+| `/donate`   | `donate`   | `/api/cms/content/donate`     |
+| `/contact`  | `contact`  | `/api/cms/content/contact`    |
 
-Field aliases: `client/src/utils/cmsMappers.js` → `normalizeSitePageData()` (legal `body`/`contentHtml`, thankyou, contact/join heroes, FAQ items).
+Field aliases: `client/src/utils/cmsMappers.js` + `server/lib/cmsPageNormalize.js` → `normalizeSitePageData()` (home `sections.*`, about `heroHeading`/`heroQuote`, donate `quote`/`taxCard`, contact/join `sections[]`, FAQ items). DB sync includes these slugs via `POST /api/cms/sync`.
 
 ---
 

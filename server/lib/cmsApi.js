@@ -3,6 +3,8 @@
  * Reads published content only (/api/public/*). Does not touch form-transfer routes.
  */
 
+const { normalizeSitePageData: normalizeCmsPageData } = require("./cmsPageNormalize");
+
 const CMS_BASE = (process.env.OVA_CMS_API_URL || "").replace(/\/$/, "");
 const CMS_API_KEY = (process.env.OVA_CMS_PUBLIC_API_KEY || "").trim();
 const CMS_ENABLED = process.env.OVA_CMS_CONTENT_ENABLED === "true";
@@ -242,51 +244,6 @@ async function fetchCms(path, options = {}) {
   }
 
   return fallbackStale;
-}
-
-/** Align CMS API fields with OVA_Web page components (legal body, section heroes, thank-you). */
-function normalizeCmsPageData(slug, data, title = "") {
-  if (!data || typeof data !== "object" || Array.isArray(data)) {
-    return data && typeof data === "object" ? data : {};
-  }
-  const out = { ...data };
-  const pageTitle = (title || "").trim();
-  const firstSection =
-    Array.isArray(out.sections) &&
-    out.sections[0] &&
-    typeof out.sections[0] === "object"
-      ? out.sections[0]
-      : null;
-
-  if (slug === "terms" || slug === "privacy" || slug === "refund") {
-    const html = (out.contentHtml || "").trim();
-    if (html && !out.body) out.body = out.contentHtml;
-    if (!out.heroHeading && pageTitle) out.heroHeading = pageTitle;
-    if (!out.heroSubtext && out.introLead) out.heroSubtext = out.introLead;
-    else if (!out.heroSubtext && out.lead) out.heroSubtext = out.lead;
-  }
-  if (slug === "thankyou") {
-    if (!out.heroHeading && out.heading) out.heroHeading = out.heading;
-    if (!out.heroSubtext && out.message) out.heroSubtext = out.message;
-  }
-  if (slug === "contact" || slug === "join") {
-    if (firstSection) {
-      if (!out.heroHeading && firstSection.heading)
-        out.heroHeading = firstSection.heading;
-      if (!out.heroSubtext && firstSection.body)
-        out.heroSubtext = firstSection.body;
-    }
-  }
-  if (slug === "contact") {
-    if (!out.mapHeading && out.mapTitle) out.mapHeading = out.mapTitle;
-    if (Array.isArray(out.faqs) && out.faqs.length && !out.faqItems?.length) {
-      out.faqItems = out.faqs.map((item) => ({
-        q: item.q || item.question || "",
-        a: item.a || item.answer || "",
-      }));
-    }
-  }
-  return out;
 }
 
 async function fetchCmsPage(slug, options = {}) {

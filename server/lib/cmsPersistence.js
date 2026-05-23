@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 const CmsSnapshot = require('../models/CmsSnapshot');
 const { rewriteDeep } = require('./cmsAssetUrls');
 
-const IN_SCOPE_PAGES = ['home', 'about', 'services', 'events'];
+const IN_SCOPE_PAGES = ['home', 'about', 'services', 'events', 'join', 'donate', 'contact'];
 
 function isDbReady() {
   return mongoose.connection.readyState === 1;

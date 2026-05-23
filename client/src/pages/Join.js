@@ -6,6 +6,7 @@ import { Sparkles, GraduationCap, Users, Award, Send, CheckCircle2, MapPin, Rock
 import SEO from '../components/SEO';
 import { loadRecaptchaScript } from '../utils/recaptchaLoader';
 import { useCmsPage } from '../hooks/useCms';
+import { mapCmsTextCards, mapCmsTestimonials } from '../utils/cmsMappers';
 import { stripHtml } from '../utils/cmsHtml';
 
 const ReCAPTCHA = lazy(() => import('react-google-recaptcha'));
@@ -48,8 +49,34 @@ function AnimatedStat({ target, suffix = '', duration = 2000, isVisible }) {
   );
 }
 
+const JOIN_BENEFITS = [
+  { icon: Sparkles, title: 'Real Impact', desc: 'See the direct difference your efforts make in communities.' },
+  { icon: GraduationCap, title: 'Learning & Growth', desc: 'Develop new skills and gain hands-on experience.' },
+  { icon: Users, title: 'Community', desc: 'Join a supportive network of like-minded changemakers.' },
+  { icon: Award, title: 'Recognition', desc: 'Earn certificates and formal acknowledgment of your contributions.' },
+];
+
+const JOIN_ROLES = [
+  { icon: BookOpen, title: 'Education Support', desc: 'Tutor, mentor, or assist in educational programs.' },
+  { icon: Globe, title: 'Community Outreach', desc: 'Engage with local communities and spread awareness.' },
+  { icon: Calendar, title: 'Event Coordination', desc: 'Help plan and run OVA™ events and campaigns.' },
+  { icon: ClipboardList, title: 'Administrative Support', desc: 'Assist with coordination, communications, and logistics.' },
+];
+
+const JOIN_STEPS = [
+  { icon: Send, title: 'Apply', desc: 'Fill out the application form below.' },
+  { icon: CheckCircle2, title: 'Orientation', desc: 'Attend a brief orientation session.' },
+  { icon: MapPin, title: 'Get Assigned', desc: 'We match you with a role that fits your skills.' },
+  { icon: Rocket, title: 'Start Volunteering', desc: 'Begin making an impact in your community.' },
+];
+
+const JOIN_TESTIMONIALS = [
+  { quote: 'Volunteering with OVA™ gave me purpose and a community that truly cares.', author: '- Volunteer, Mumbai' },
+  { quote: 'I learned more in six months here than in years elsewhere. Real impact, real growth.', author: '- Member, Pune' },
+];
+
 function Join() {
-  const { data: cmsData, seo: cmsSeo, fromCms } = useCmsPage('join');
+  const { data: cmsData, seo: cmsSeo } = useCmsPage('join');
   const formRef = useRef(null);
   const statsRef = useRef(null);
   const [statsVisible, setStatsVisible] = useState(false);
@@ -92,36 +119,23 @@ function Join() {
     return () => observer.disconnect();
   }, []);
 
-  const benefits = [
-    { icon: Sparkles, title: 'Real Impact', desc: 'See the direct difference your efforts make in communities.' },
-    { icon: GraduationCap, title: 'Learning & Growth', desc: 'Develop new skills and gain hands-on experience.' },
-    { icon: Users, title: 'Community', desc: 'Join a supportive network of like-minded changemakers.' },
-    { icon: Award, title: 'Recognition', desc: 'Earn certificates and formal acknowledgment of your contributions.' },
-  ];
-
-  const roles = [
-    { icon: BookOpen, title: 'Education Support', desc: 'Tutor, mentor, or assist in educational programs.' },
-    { icon: Globe, title: 'Community Outreach', desc: 'Engage with local communities and spread awareness.' },
-    { icon: Calendar, title: 'Event Coordination', desc: 'Help plan and run OVA™ events and campaigns.' },
-    { icon: ClipboardList, title: 'Administrative Support', desc: 'Assist with coordination, communications, and logistics.' },
-  ];
-
-  const steps = [
-    { icon: Send, title: 'Apply', desc: 'Fill out the application form below.' },
-    { icon: CheckCircle2, title: 'Orientation', desc: 'Attend a brief orientation session.' },
-    { icon: MapPin, title: 'Get Assigned', desc: 'We match you with a role that fits your skills.' },
-    { icon: Rocket, title: 'Start Volunteering', desc: 'Begin making an impact in your community.' },
-  ];
+  const benefits = cmsData?.benefits?.length
+    ? mapCmsTextCards(cmsData.benefits, JOIN_BENEFITS)
+    : JOIN_BENEFITS;
+  const roles = cmsData?.roles?.length
+    ? mapCmsTextCards(cmsData.roles, JOIN_ROLES)
+    : JOIN_ROLES;
+  const steps = cmsData?.steps?.length
+    ? mapCmsTextCards(cmsData.steps, JOIN_STEPS)
+    : JOIN_STEPS;
+  const testimonials = cmsData?.testimonials?.length
+    ? mapCmsTestimonials(cmsData.testimonials, JOIN_TESTIMONIALS)
+    : JOIN_TESTIMONIALS;
 
   const impactStats = [
     { target: 100, suffix: '+', label: 'Volunteers' },
     { target: 40, suffix: '+', label: 'Schools Served' },
     { target: 500, suffix: '+', label: 'Lives Touched' },
-  ];
-
-  const testimonials = [
-    { quote: 'Volunteering with OVA™ gave me purpose and a community that truly cares.', author: '- Volunteer, Mumbai' },
-    { quote: 'I learned more in six months here than in years elsewhere. Real impact, real growth.', author: '- Member, Pune' },
   ];
 
   const handleSubmit = async (e) => {
@@ -183,13 +197,13 @@ function Join() {
           <div className="container about-hero-container">
             <div className="about-hero-content donate-hero-content">
               <p className="donate-hero-eyebrow">Volunteer</p>
-              <h1 className="about-hero-title">{fromCms && cmsData?.heroHeading ? cmsData.heroHeading : <>Become a Volunteer. Create <em>Impact</em>.</>}</h1>
+              <h1 className="about-hero-title">{cmsData?.heroHeading ? cmsData.heroHeading : <>Become a Volunteer. Create <em>Impact</em>.</>}</h1>
               <blockquote className="donate-hero-quote">
-                {fromCms && cmsData?.heroSubtext ? stripHtml(cmsData.heroSubtext) : 'Join OVA™ and be part of a community that empowers lives and transforms futures.'}
+                {cmsData?.heroSubtext ? stripHtml(cmsData.heroSubtext) : 'Join OVA™ and be part of a community that empowers lives and transforms futures.'}
                 <cite>, OVA™</cite>
               </blockquote>
               <button type="button" onClick={scrollToForm} className="donate-hero-cta">
-                {fromCms && cmsData?.heroCtaLabel ? cmsData.heroCtaLabel : 'Apply Now'}
+                {cmsData?.heroCtaLabel || 'Apply Now'}
               </button>
             </div>
           </div>

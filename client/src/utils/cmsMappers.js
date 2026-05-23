@@ -126,16 +126,40 @@ export function mapCmsHeroSlides(cmsSlides, fallbackSlides) {
       image: pickImage(slide) || base.image,
       eyebrow: (slide.eyebrow || slide.kicker || base.eyebrow || '').trim() || base.eyebrow,
       headlineParts: mapCmsHeadlineParts(slide, base.headlineParts),
-      subtext: (slide.body || slide.subtext || slide.description || base.subtext || '').trim() || base.subtext,
+      subtext: (slide.subheading || slide.body || slide.subtext || slide.description || base.subtext || '').trim() || base.subtext,
       tags: slide.tags ?? base.tags,
-      btns: Array.isArray(slide.cta) && slide.cta.length
-        ? slide.cta.map((c) => ({
+      btns: (() => {
+        if (Array.isArray(slide.cta) && slide.cta.length) {
+          return slide.cta.map((c) => ({
             label: c.label || c.text || 'Learn more',
             to: c.to || c.href || '/',
             primary: Boolean(c.primary),
             arrow: Boolean(c.arrow),
-          }))
-        : base.btns,
+          }));
+        }
+        const primary = (slide.ctaLabel || slide.cta || '').trim();
+        const secondary = (slide.ctaSecondaryLabel || slide.secondaryCta || '').trim();
+        if (primary || secondary) {
+          const btns = [];
+          if (primary) {
+            btns.push({
+              label: primary,
+              to: slide.ctaTo || slide.ctaHref || '/services',
+              primary: true,
+              arrow: true,
+            });
+          }
+          if (secondary) {
+            btns.push({
+              label: secondary,
+              to: slide.ctaSecondaryTo || slide.ctaSecondaryHref || '/donate',
+              primary: false,
+            });
+          }
+          return btns.length ? btns : base.btns;
+        }
+        return base.btns;
+      })(),
     };
   });
 }
@@ -235,6 +259,78 @@ export function mapCmsEventToCard(ev) {
   };
 }
 
+function firstSection(data) {
+  const sections = data?.sections;
+  return Array.isArray(sections) && sections[0] && typeof sections[0] === 'object'
+    ? sections[0]
+    : null;
+}
+
+/** Home may store copy under sections.hero, sections.programs, etc. */
+function flattenNestedSections(data) {
+  if (!data || typeof data !== 'object') return data;
+  const sections = data.sections;
+  if (!sections || typeof sections !== 'object' || Array.isArray(sections)) {
+    return { ...data };
+  }
+  const out = { ...data };
+  for (const [key, value] of Object.entries(sections)) {
+    if (value == null) continue;
+    if (key === 'hero' && typeof value === 'object' && !Array.isArray(value)) {
+      out.hero = { ...(out.hero && typeof out.hero === 'object' ? out.hero : {}), ...value };
+    } else {
+      out[key] = value;
+    }
+  }
+  return out;
+}
+
+/** Join benefits/roles/steps: CMS uses title + body; UI uses title + desc + icon from fallback. */
+export function mapCmsTextCards(items, fallback, descKey = 'desc') {
+  const list = Array.isArray(items) ? items : [];
+  if (!list.length) return fallback;
+  return list.map((item, i) => {
+    const base = fallback[i] || {};
+    const text = item.body || item[descKey] || item.desc || item.description || '';
+    return {
+      ...base,
+      title: item.title || base.title || '',
+      [descKey]: text || base[descKey] || '',
+    };
+  });
+}
+
+export function mapCmsTestimonials(items, fallback) {
+  const list = Array.isArray(items) ? items : [];
+  if (!list.length) return fallback;
+  return list.map((t, i) => ({
+    quote: t.quote || t.body || fallback[i]?.quote || '',
+    author: t.author || t.attribution || fallback[i]?.author || '',
+  }));
+}
+
+export function mapCmsFaqs(items, fallback) {
+  const list = Array.isArray(items) ? items : [];
+  if (!list.length) return fallback;
+  return list.map((item) => ({
+    q: item.q || item.question || '',
+    a: item.a || item.answer || item.body || '',
+  }));
+}
+
+export function mapCmsTaxCard(taxCard, fallback) {
+  if (!taxCard || typeof taxCard !== 'object') return fallback;
+  return {
+    title: taxCard.title || fallback.title,
+    paragraphs: Array.isArray(taxCard.paragraphs) && taxCard.paragraphs.length
+      ? taxCard.paragraphs
+      : fallback.paragraphs,
+    implementingPartners: Array.isArray(taxCard.implementingPartners) && taxCard.implementingPartners.length
+      ? taxCard.implementingPartners
+      : fallback.implementingPartners,
+  };
+}
+
 export function normalizeEventsPageCopy(data, defaults) {
   const d = data && typeof data === 'object' ? data : {};
   const heroSubtext = (d.heroSubtext || d.heroQuote || '').trim();
@@ -246,17 +342,15 @@ export function normalizeEventsPageCopy(data, defaults) {
   };
 }
 
-/** Align CMS API fields with what OVA_Web page components read (legal, contact, thankyou, etc.). */
+/** Align CMS API fields with what OVA_Web page components read. Mirrors server/lib/cmsPageNormalize.js */
 export function normalizeSitePageData(slug, data, title = '') {
   if (!data || typeof data !== 'object' || Array.isArray(data)) {
     return data && typeof data === 'object' ? data : {};
   }
-  const out = { ...data };
+
+  let out = flattenNestedSections({ ...data });
   const pageTitle = (title || '').trim();
-  const firstSection =
-    Array.isArray(out.sections) && out.sections[0] && typeof out.sections[0] === 'object'
-      ? out.sections[0]
-      : null;
+  const sec = firstSection(out);
 
   if (slug === 'terms' || slug === 'privacy' || slug === 'refund') {
     const html = (out.contentHtml || '').trim();
@@ -272,9 +366,9 @@ export function normalizeSitePageData(slug, data, title = '') {
   }
 
   if (slug === 'contact' || slug === 'join') {
-    if (firstSection) {
-      if (!out.heroHeading && firstSection.heading) out.heroHeading = firstSection.heading;
-      if (!out.heroSubtext && firstSection.body) out.heroSubtext = firstSection.body;
+    if (sec) {
+      if (!out.heroHeading && sec.heading) out.heroHeading = sec.heading;
+      if (!out.heroSubtext && sec.body) out.heroSubtext = sec.body;
     }
   }
 
@@ -286,6 +380,26 @@ export function normalizeSitePageData(slug, data, title = '') {
         a: item.a || item.answer || '',
       }));
     }
+  }
+
+  if (slug === 'donate') {
+    if (!out.heroHeading && pageTitle) out.heroHeading = pageTitle;
+    if (!out.heroSubtext && out.quote) out.heroSubtext = out.quote;
+    if (!out.heroQuoteAuthor && out.quoteAuthor) out.heroQuoteAuthor = out.quoteAuthor;
+    if (sec) {
+      if (!out.bankHeading && sec.heading) out.bankHeading = sec.heading;
+      if (!out.bankBody && sec.body) out.bankBody = sec.body;
+    }
+  }
+
+  if (slug === 'about') {
+    if (!out.heroQuote && out.heroSubtext) out.heroQuote = out.heroSubtext;
+    if (!out.heroButtonLabel && out.ctaLabel) out.heroButtonLabel = out.ctaLabel;
+    if (!out.heroCtaLabel && out.heroButtonLabel) out.heroCtaLabel = out.heroButtonLabel;
+  }
+
+  if (slug === 'join' && !out.heroCtaLabel && out.heroButtonLabel) {
+    out.heroCtaLabel = out.heroButtonLabel;
   }
 
   return out;
