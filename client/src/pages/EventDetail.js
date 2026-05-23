@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import AboutHeroBg from '../components/AboutHeroBg';
 import { EVENTS } from './Events';
-import { getOptimizedImageUrl, cmsImageUrl } from '../utils/imageUrl';
+import CmsImageSlider from '../components/CmsImageSlider';
 import { useCmsEvent } from '../hooks/useCms';
 import { mapCmsEventToCard } from '../utils/cmsMappers';
 
@@ -63,13 +63,13 @@ function EventDetail() {
           <div className="ev-detail-layout">
             {/* Event image */}
             <div className="ev-detail-media">
-              {ev.image ? (
-                <img src={getOptimizedImageUrl(cmsImageUrl(ev.image))} alt={ev.title} className="ev-detail-img" width={800} height={500} loading="lazy" decoding="async" onError={(e) => { if (e.target.src !== cmsImageUrl(ev.image)) { e.target.src = cmsImageUrl(ev.image); e.target.onerror = null; } }} />
-              ) : (
-                <div className="ev-detail-placeholder" aria-label="Image coming soon">
-                  <i className="bi bi-camera" aria-hidden="true" />
-                </div>
-              )}
+              <CmsImageSlider
+                images={ev.images?.length ? ev.images : ev.image ? [ev.image] : []}
+                alt={ev.title}
+                className="cms-image-slider--ev-detail"
+                imgClassName="ev-detail-img"
+                placeholderClassName="ev-detail-placeholder"
+              />
             </div>
 
             {/* Event info card */}

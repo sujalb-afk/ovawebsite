@@ -8,7 +8,7 @@ const WHY_ICONS = [
   'bi-trophy',
   'bi-lightning-charge',
 ];
-import { pickImage, cmsImageUrl } from './imageUrl';
+import { pickImage, pickImages, cmsImageUrl } from './imageUrl';
 
 const SERVICE_ICONS = {
   Career: 'bi-briefcase',
@@ -253,7 +253,8 @@ export function mapCmsEventToCard(ev) {
     address: ev.address || ev.location || '',
     organization: ev.organization || 'OVA™',
     contact: ev.contact || ev.contactEmail || 'support@ova.ngo',
-    image: pickImage(ev) || (Array.isArray(ev.images) && ev.images[0]?.url ? cmsImageUrl(ev.images[0].url) : ''),
+    images: pickImages(ev),
+    image: pickImage(ev),
     desc,
     highlights: Array.isArray(ev.highlights) ? ev.highlights : [],
   };

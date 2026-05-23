@@ -20,11 +20,37 @@ export function cmsImageUrl(url) {
   return rewriteCmsMediaUrl(url);
 }
 
+function pushImageUrl(urls, raw) {
+  if (raw == null || raw === '') return;
+  const resolved =
+    typeof raw === 'string'
+      ? cmsImageUrl(raw)
+      : raw?.url
+        ? cmsImageUrl(raw.url)
+        : '';
+  if (resolved && !urls.includes(resolved)) urls.push(resolved);
+}
+
+/** All CMS image URLs for sliders (imageUrls[], images[], image, imageUrl, src). */
+export function pickImages(item) {
+  if (!item) return [];
+  const urls = [];
+  if (Array.isArray(item.imageUrls)) {
+    item.imageUrls.forEach((u) => pushImageUrl(urls, u));
+  }
+  if (Array.isArray(item.images)) {
+    item.images.forEach((img) => pushImageUrl(urls, img));
+  }
+  pushImageUrl(urls, item.image);
+  pushImageUrl(urls, item.imageUrl);
+  pushImageUrl(urls, item.src);
+  return urls;
+}
+
 export function pickImage(item) {
-  if (!item) return '';
-  if (Array.isArray(item.imageUrls) && item.imageUrls[0]) return cmsImageUrl(item.imageUrls[0]);
-  if (Array.isArray(item.images) && item.images[0]?.url) return cmsImageUrl(item.images[0].url);
-  return cmsImageUrl(item.image || item.imageUrl || item.src || '');
+  const all = pickImages(item);
+  if (all.length) return all[0];
+  return '';
 }
 
 export function cmsImageFallback(path) {

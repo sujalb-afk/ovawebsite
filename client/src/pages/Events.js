@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import AboutHeroBg from '../components/AboutHeroBg';
-import { getOptimizedImageUrl, cmsImageUrl, cmsImageFallback } from '../utils/imageUrl';
+import CmsImageSlider from '../components/CmsImageSlider';
 import { useCmsPage, useCmsEvents } from '../hooks/useCms';
 import { mapCmsEventToCard, normalizeEventsPageCopy } from '../utils/cmsMappers';
 import { stripHtml } from '../utils/cmsHtml';
@@ -174,29 +174,13 @@ function Events() {
             {events.map((ev) => (
               <article key={ev.id} className="ev-card-v">
                 <div className="ev-card-v-img-wrap">
-                  {ev.image ? (
-                    <img
-                      src={getOptimizedImageUrl(cmsImageUrl(ev.image))}
-                      alt={ev.title}
-                      className="ev-card-v-img"
-                      width={400}
-                      height={300}
-                      loading="lazy"
-                      decoding="async"
-                      onError={(e) => {
-                        const fallback = cmsImageFallback(ev.image);
-                        if (fallback && e.target.src !== fallback) {
-                          e.target.src = fallback;
-                          e.target.onerror = null;
-                        }
-                      }}
-                    />
-                  ) : (
-                    <div className="ev-card-v-placeholder" aria-label="Image coming soon">
-                      <i className="bi bi-camera ev-card-v-placeholder-icon" aria-hidden="true" />
-                      <span className="ev-card-v-placeholder-text">Image coming soon</span>
-                    </div>
-                  )}
+                  <CmsImageSlider
+                    images={ev.images?.length ? ev.images : ev.image ? [ev.image] : []}
+                    alt={ev.title}
+                    className="cms-image-slider--ev-card"
+                    imgClassName="ev-card-v-img"
+                    placeholderClassName="ev-card-v-placeholder"
+                  />
                   <div className="ev-card-tag ev-card-tag--on-image">
                     <i className={`bi ${ev.tagIcon}`} aria-hidden="true" />
                     {ev.tag}

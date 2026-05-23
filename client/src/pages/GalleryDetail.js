@@ -2,7 +2,8 @@ import { Link, useParams } from 'react-router-dom';
 import { useCmsGallery, useCmsGalleryItem } from '../hooks/useCms';
 import SEO from '../components/SEO';
 import AboutHeroBg from '../components/AboutHeroBg';
-import { getOptimizedImageUrl, pickImage, cmsImageUrl } from '../utils/imageUrl';
+import { pickImage, pickImages } from '../utils/imageUrl';
+import CmsImageSlider from '../components/CmsImageSlider';
 import { GALLERY_ITEMS, getUniqueGalleryItems } from '../data/galleryItems';
 
 const PLACEHOLDER = 'https://via.placeholder.com/900x675/2d6a4f/ffffff?text=OVA™+Gallery';
@@ -16,6 +17,7 @@ function GalleryDetail() {
   const publishedItems = galleryFromCms && Array.isArray(cmsGallery) && cmsGallery.length > 0 
     ? cmsGallery.map((g) => ({
         src: pickImage(g) || g.imageUrl || g.image,
+        images: pickImages(g),
         alt: g.title || 'Gallery image',
         title: g.title,
         summary: g.subtitle || g.category,
@@ -34,6 +36,7 @@ function GalleryDetail() {
 
   const item = itemFromCms && cmsItem ? {
     src: pickImage(cmsItem) || cmsItem.imageUrl || cmsItem.image,
+    images: pickImages(cmsItem),
     alt: cmsItem.title || 'Gallery image',
     title: cmsItem.title,
     summary: cmsItem.subtitle || cmsItem.category,
@@ -110,17 +113,12 @@ function GalleryDetail() {
           </div>
           <div className="gallery-detail-layout">
             <div className="gallery-detail-image-wrap">
-              <img
-                src={getOptimizedImageUrl(cmsImageUrl(item.src))}
+              <CmsImageSlider
+                images={item.images?.length ? item.images : item.src ? [item.src] : []}
                 alt={item.alt}
-                className="gallery-detail-image"
-                width={900}
-                height={675}
-                decoding="async"
-                onError={(e) => {
-                  e.target.src = cmsImageUrl(item.src);
-                  e.target.onerror = () => { e.target.src = PLACEHOLDER; e.target.onerror = null; };
-                }}
+                className="cms-image-slider--gallery-detail"
+                imgClassName="gallery-detail-image"
+                loading="eager"
               />
             </div>
             <div className="gallery-detail-content">

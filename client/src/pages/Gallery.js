@@ -2,11 +2,11 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import AboutHeroBg from '../components/AboutHeroBg';
-import { getOptimizedImageUrl, cmsImageUrl } from '../utils/imageUrl';
+import { pickImage, pickImages } from '../utils/imageUrl';
 import { GALLERY_ITEMS, getUniqueGalleryItems } from '../data/galleryItems';
 import { useCmsPage, useCmsGallery } from '../hooks/useCms';
 import { stripHtml } from '../utils/cmsHtml';
-import { pickImage } from '../utils/imageUrl';
+import CmsImageSlider from '../components/CmsImageSlider';
 
 
 const MAX_HOVER_LENGTH = 180;
@@ -16,8 +16,6 @@ function truncate(str, max = MAX_HOVER_LENGTH) {
   return str.slice(0, max).trim() + '…';
 }
 
-const PLACEHOLDER = 'https://via.placeholder.com/600x400/2d6a4f/ffffff?text=OVA™+Gallery';
-
 function Gallery() {
   const { data: cmsData, seo: cmsSeo, fromCms } = useCmsPage('gallery');
   const { gallery: cmsGallery, fromCms: galleryFromCms } = useCmsGallery();
@@ -26,6 +24,7 @@ function Gallery() {
     if (galleryFromCms && Array.isArray(cmsGallery) && cmsGallery.length > 0) {
       return cmsGallery.map((g) => ({
         src: pickImage(g) || g.imageUrl || g.image,
+        images: pickImages(g),
         alt: g.title || 'Gallery image',
         title: g.title,
         summary: g.subtitle || g.category,
@@ -63,20 +62,19 @@ function Gallery() {
         <div className="gallery-container">
           <div className="gallery-grid">
             {uniqueGalleryImages.map((item) => (
-              <figure key={item.src} className="gallery-card">
+              <figure key={item.slug || item.src} className="gallery-card">
                 <div className="gallery-card-inner">
-                  <img
-                    src={getOptimizedImageUrl(cmsImageUrl(item.src))}
+                  <Link
+                    to={`/gallery/${item.slug}`}
+                    className="gallery-card-link"
+                    aria-label={`Open ${item.title}`}
+                  />
+                  <CmsImageSlider
+                    images={item.images?.length ? item.images : item.src ? [item.src] : []}
                     alt={item.alt}
-                    className="gallery-card-img"
-                    width={400}
-                    height={300}
+                    className="cms-image-slider--gallery-card"
+                    imgClassName="gallery-card-img"
                     loading="lazy"
-                    decoding="async"
-                    onError={(e) => {
-                      e.target.src = cmsImageUrl(item.src);
-                      e.target.onerror = () => { e.target.src = PLACEHOLDER; e.target.onerror = null; };
-                    }}
                   />
                   <div className="gallery-card-overlay">
                     <div className="gallery-card-overlay-content">
@@ -86,11 +84,6 @@ function Gallery() {
                       ) : null}
                     </div>
                   </div>
-                  <Link
-                    to={`/gallery/${item.slug}`}
-                    className="gallery-card-link"
-                    aria-label={`Open ${item.title}`}
-                  />
                 </div>
               </figure>
             ))}
