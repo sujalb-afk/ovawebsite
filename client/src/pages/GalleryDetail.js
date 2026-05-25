@@ -1,7 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import { useCmsGallery, useCmsGalleryItem } from '../hooks/useCms';
 import SEO from '../components/SEO';
-import AboutHeroBg from '../components/AboutHeroBg';
 import { pickImage, pickImages } from '../utils/imageUrl';
 import CmsImageSlider from '../components/CmsImageSlider';
 import { GALLERY_ITEMS, getUniqueGalleryItems } from '../data/galleryItems';
@@ -66,16 +65,6 @@ function GalleryDetail() {
           canonical="/gallery"
           keywords="OVA gallery"
         />
-        <section className="about-hero">
-          <AboutHeroBg />
-          <div className="about-hero-overlay" aria-hidden="true" />
-          <div className="container about-hero-container">
-            <div className="about-hero-content">
-              <h1 className="about-hero-title">Gallery</h1>
-              <p className="about-hero-subtext">Image not found</p>
-            </div>
-          </div>
-        </section>
         <section className="gallery-detail-section">
           <div className="gallery-detail-container">
             <p className="gallery-detail-not-found">The requested gallery item was not found.</p>
@@ -94,17 +83,6 @@ function GalleryDetail() {
         canonical={`/gallery/${item.slug}`}
         keywords="OVA gallery, community impact photos"
       />
-
-      <section className="about-hero">
-        <AboutHeroBg />
-        <div className="about-hero-overlay" aria-hidden="true" />
-        <div className="container about-hero-container">
-          <div className="about-hero-content">
-            <h1 className="about-hero-title">Gallery Details</h1>
-            <p className="about-hero-subtext">{item.title}</p>
-          </div>
-        </div>
-      </section>
 
       <section className="gallery-detail-section">
         <div className="gallery-detail-container">
