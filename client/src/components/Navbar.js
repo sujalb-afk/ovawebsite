@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useLocation } from 'react-router-dom';
 import { useCmsGlobal } from '../hooks/useCms';
@@ -28,6 +28,34 @@ const NAV_ITEMS = [
 const MOBILE_BREAKPOINT = 768;
 const PUBLIC_URL = (import.meta.env.BASE_URL || '').replace(/\/$/, '');
 const OVA_CONNECT_URL = 'https://connect.ova.ngo/';
+
+const DROPDOWN_DEFAULTS = {
+  about: ABOUT_ITEMS,
+  events: EVENTS_ITEMS,
+};
+
+/** CMS sometimes duplicates OVA Connect / Donate as nav links; those stay in the CTA area only. */
+function isNavCtaDuplicate(item) {
+  if (!item || item.type === 'dropdown') return false;
+  const path = String(item.path || item.to || '').toLowerCase().trim();
+  const label = String(item.label || '').toLowerCase().trim();
+  if (path.includes('connect.ova.ngo') || path === '/donate' || path.startsWith('/donate#')) return true;
+  if (/^donate(\s+now)?$/i.test(label) || /^ova\s*connect$/i.test(label)) return true;
+  return false;
+}
+
+function sanitizeNavItems(items) {
+  if (!Array.isArray(items)) return NAV_ITEMS;
+  return items
+    .filter((item) => item && !isNavCtaDuplicate(item))
+    .map((item) => {
+      if (item.type !== 'dropdown') return item;
+      const key = item.key || '';
+      const subs = Array.isArray(item.items) && item.items.length ? item.items : DROPDOWN_DEFAULTS[key];
+      return subs?.length ? { ...item, items: subs } : null;
+    })
+    .filter(Boolean);
+}
 
 /* Transparent navbar (on hero) → ovalogo1; white navbar → ovalogo2. */
 function getLogoUrls(onHero, cmsGlobal = null) {
@@ -60,8 +88,13 @@ function Navbar() {
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT);
   const location = useLocation();
   const { global: cmsGlobal } = useCmsGlobal();
-  const navItems = cmsGlobal?.navItems?.length ? cmsGlobal.navItems : NAV_ITEMS;
+  const navItems = useMemo(
+    () => sanitizeNavItems(cmsGlobal?.navItems?.length ? cmsGlobal.navItems : NAV_ITEMS),
+    [cmsGlobal?.navItems]
+  );
   const donateLabel = cmsGlobal?.donateLabel || 'Donate Now';
+  const connectLabel = cmsGlobal?.connectLabel || 'OVA Connect';
+  const logoUrls = useMemo(() => getLogoUrls(onHero, cmsGlobal), [onHero, cmsGlobal]);
 
   const isHome = location.pathname === '/';
   const isDonatePage = location.pathname === '/donate';
@@ -133,16 +166,16 @@ function Navbar() {
         {/* Logo: WebP 90w/180w (run optimize-images.js); fallback to PNG */}
         <Link className="navbar-brand navbar-brand-updated" to="/" aria-label="OVA™ Home">
           <img
-            src={getLogoUrls(onHero, cmsGlobal).src}
-            srcSet={getLogoUrls(onHero, cmsGlobal).srcSet}
-            sizes={getLogoUrls(onHero, cmsGlobal).sizes}
+            src={logoUrls.src}
+            srcSet={logoUrls.srcSet}
+            sizes={logoUrls.sizes}
             alt="OVA™"
             className="navbar-logo-ova"
             width={90}
             height={90}
             decoding="async"
             onError={(e) => {
-              const { fallback } = getLogoUrls(onHero, cmsGlobal);
+              const { fallback } = logoUrls;
               if (fallback && !e.target.src.endsWith('.png') && !e.target.src.includes(fallback)) {
                 e.target.src = fallback;
                 e.target.onerror = null;
@@ -174,11 +207,14 @@ function Navbar() {
                       aria-expanded={isOpenThis}
                       aria-haspopup="true"
                     >
-                      {item.label}
-                      <span className={`nav-dropdown-arrow${isOpenThis ? ' arrow-open' : ''}`} aria-hidden="true">▾</span>
+                      <span className="nav-dropdown-label">{item.label}</span>
+                      <i
+                        className={`bi bi-chevron-down nav-dropdown-chevron${isOpenThis ? ' nav-dropdown-chevron--open' : ''}`}
+                        aria-hidden="true"
+                      />
                     </button>
                     <div className={`nav-dropdown-menu${isOpenThis ? ' open' : ''}`}>
-                      {item.items.map((sub) => (
+                      {(item.items || []).map((sub) => (
                         <Link
                           key={sub.path}
                           className={`nav-dropdown-item${isActive(sub.path) ? ' active' : ''}`}
@@ -215,7 +251,7 @@ function Navbar() {
               rel="noopener noreferrer"
               onClick={() => setIsOpen(false)}
             >
-              OVA Connect
+              {connectLabel}
             </a>
             <Link
               className="btn-nav-donate-mobile"
@@ -236,7 +272,7 @@ function Navbar() {
             rel="noopener noreferrer"
             onClick={() => setIsOpen(false)}
           >
-            OVA Connect
+            {connectLabel}
           </a>
           <Link className="btn-nav-donate-updated" to={donateTo} onClick={() => setIsOpen(false)}>
             {donateLabel}

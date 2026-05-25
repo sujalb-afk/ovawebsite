@@ -1,3 +1,4 @@
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useCmsGallery, useCmsGalleryItem } from '../hooks/useCms';
 import SEO from '../components/SEO';
@@ -56,6 +57,19 @@ function GalleryDetail() {
     ? publishedItems[(currentIndex - 1 + publishedItems.length) % publishedItems.length]
     : null;
 
+  const detailImages = useMemo(
+    () => (item?.images?.length ? item.images : item?.src ? [item.src] : []),
+    [item]
+  );
+  const [slideIndex, setSlideIndex] = useState(0);
+  const handleSlideChange = useCallback((index) => {
+    setSlideIndex(index);
+  }, []);
+
+  useEffect(() => {
+    setSlideIndex(0);
+  }, [slug, detailImages.join('|')]);
+
   if (!item) {
     return (
       <div className="gallery-detail-page-wrap">
@@ -66,7 +80,7 @@ function GalleryDetail() {
           keywords="OVA gallery"
         />
         <section className="gallery-detail-section">
-          <div className="gallery-detail-container">
+          <div className="container gallery-detail-container">
             <p className="gallery-detail-not-found">The requested gallery item was not found.</p>
             <Link to="/gallery" className="gallery-detail-back">Back to Gallery</Link>
           </div>
@@ -85,18 +99,21 @@ function GalleryDetail() {
       />
 
       <section className="gallery-detail-section">
-        <div className="gallery-detail-container">
+        <div className="container gallery-detail-container">
           <div className="gallery-detail-top-actions">
             <Link to="/gallery" className="gallery-detail-back">← Back to Gallery</Link>
           </div>
           <div className="gallery-detail-layout">
             <div className="gallery-detail-image-wrap">
               <CmsImageSlider
-                images={item.images?.length ? item.images : item.src ? [item.src] : []}
+                images={detailImages}
                 alt={item.alt}
                 className="cms-image-slider--gallery-detail"
                 imgClassName="gallery-detail-image"
                 loading="eager"
+                counterPosition="between"
+                showCounter={false}
+                onIndexChange={handleSlideChange}
               />
             </div>
             <div className="gallery-detail-content">
@@ -116,6 +133,13 @@ function GalleryDetail() {
                 <Link to={`/gallery/${prevItem.slug}`} className="gallery-detail-nav-link">
                   ← Previous
                 </Link>
+                {detailImages.length > 1 ? (
+                  <span className="gallery-detail-slide-counter" aria-live="polite">
+                    {slideIndex + 1} / {detailImages.length}
+                  </span>
+                ) : (
+                  <span className="gallery-detail-slide-counter gallery-detail-slide-counter--empty" aria-hidden="true" />
+                )}
                 <Link to={`/gallery/${nextItem.slug}`} className="gallery-detail-nav-link">
                   Next →
                 </Link>

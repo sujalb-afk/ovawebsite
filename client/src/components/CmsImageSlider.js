@@ -12,6 +12,9 @@ function CmsImageSlider({
   imgClassName = '',
   placeholderClassName = '',
   loading = 'lazy',
+  counterPosition = 'corner',
+  showCounter = true,
+  onIndexChange,
 }) {
   const slides = (Array.isArray(images) ? images : []).filter(Boolean);
   const [index, setIndex] = useState(0);
@@ -20,6 +23,10 @@ function CmsImageSlider({
   useEffect(() => {
     setIndex(0);
   }, [slides.join('|')]);
+
+  useEffect(() => {
+    onIndexChange?.(index, count);
+  }, [index, count, onIndexChange]);
 
   const go = useCallback(
     (delta) => {
@@ -41,9 +48,17 @@ function CmsImageSlider({
   }
 
   const current = slides[Math.min(index, count - 1)];
+  const counterBetween = counterPosition === 'between';
+  const sliderClass = [
+    'cms-image-slider',
+    className,
+    counterBetween ? 'cms-image-slider--counter-between' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
-    <div className={`cms-image-slider ${className}`.trim()}>
+    <div className={sliderClass}>
       <img
         src={getOptimizedImageUrl(current)}
         alt={alt}
@@ -84,9 +99,11 @@ function CmsImageSlider({
           >
             <i className="bi bi-chevron-right" aria-hidden="true" />
           </button>
-          <span className="cms-image-slider-counter" aria-live="polite">
-            {index + 1} / {count}
-          </span>
+          {showCounter && (
+            <span className="cms-image-slider-counter" aria-live="polite">
+              {index + 1} / {count}
+            </span>
+          )}
         </>
       )}
     </div>

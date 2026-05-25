@@ -9,11 +9,15 @@ import { stripHtml } from '../utils/cmsHtml';
 import CmsImageSlider from '../components/CmsImageSlider';
 
 
-const MAX_HOVER_LENGTH = 180;
-
-function truncate(str, max = MAX_HOVER_LENGTH) {
-  if (!str || str.length <= max) return str;
-  return str.slice(0, max).trim() + '…';
+function formatGalleryDate(item) {
+  if (item?.displayDate) return item.displayDate;
+  if (item?.publishedAt) {
+    const d = new Date(item.publishedAt);
+    if (!Number.isNaN(d.getTime())) {
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+  }
+  return '';
 }
 
 function Gallery() {
@@ -26,8 +30,10 @@ function Gallery() {
         src: pickImage(g) || g.imageUrl || g.image,
         images: pickImages(g),
         alt: g.title || 'Gallery image',
-        title: g.title,
-        summary: g.subtitle || g.category,
+        title: g.title || '',
+        category: g.category || g.subtitle || '',
+        displayDate: g.displayDate || '',
+        publishedAt: g.publishedAt || g.date || '',
         slug: g.slug || g._id || g.id,
       }));
     }
@@ -61,32 +67,46 @@ function Gallery() {
       <section className="gallery-section">
         <div className="gallery-container">
           <div className="gallery-grid">
-            {uniqueGalleryImages.map((item) => (
-              <figure key={item.slug || item.src} className="gallery-card">
-                <div className="gallery-card-inner">
+            {uniqueGalleryImages.map((item) => {
+              const eventDate = formatGalleryDate(item);
+              return (
+                <article key={item.slug || item.src} className="gallery-card">
                   <Link
                     to={`/gallery/${item.slug}`}
-                    className="gallery-card-link"
+                    className="gallery-card-hit"
                     aria-label={`Open ${item.title}`}
-                  />
-                  <CmsImageSlider
-                    images={item.images?.length ? item.images : item.src ? [item.src] : []}
-                    alt={item.alt}
-                    className="cms-image-slider--gallery-card"
-                    imgClassName="gallery-card-img"
-                    loading="lazy"
-                  />
-                  <div className="gallery-card-overlay">
-                    <div className="gallery-card-overlay-content">
-                      <span className="gallery-card-caption">{item.title}</span>
-                      {item.summary ? (
-                        <p className="gallery-card-hover-text">{truncate(item.summary)}</p>
+                  >
+                    <div className="gallery-card-inner">
+                      <CmsImageSlider
+                        images={item.images?.length ? item.images : item.src ? [item.src] : []}
+                        alt={item.alt}
+                        className="cms-image-slider--gallery-card"
+                        imgClassName="gallery-card-img"
+                        loading="lazy"
+                        counterPosition="between"
+                      />
+                    </div>
+                    <div className="gallery-card-meta">
+                      {item.category ? (
+                        <p className="gallery-card-category" title={item.category}>
+                          {item.category}
+                        </p>
+                      ) : null}
+                      {item.title ? (
+                        <h3 className="gallery-card-title" title={item.title}>
+                          {item.title}
+                        </h3>
+                      ) : null}
+                      {eventDate ? (
+                        <time className="gallery-card-date" dateTime={item.publishedAt || undefined}>
+                          {eventDate}
+                        </time>
                       ) : null}
                     </div>
-                  </div>
-                </div>
-              </figure>
-            ))}
+                  </Link>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>

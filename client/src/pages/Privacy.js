@@ -21,7 +21,6 @@ function Privacy() {
         <div className="container about-hero-container">
           <div className="about-hero-content">
             <h1 className="about-hero-title">{fromCms && cmsData?.heroHeading ? cmsData.heroHeading : 'Privacy Policy'}</h1>
-            <p className="about-hero-subtext">{fromCms && cmsData?.heroSubtext ? cmsData.heroSubtext : 'Last updated: October 26, 2024'}</p>
           </div>
         </div>
       </section>

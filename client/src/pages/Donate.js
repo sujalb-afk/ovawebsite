@@ -14,7 +14,7 @@ const apiBase = import.meta.env.VITE_API_URL || import.meta.env.REACT_APP_API_UR
 const DONATE_FAQS = [
   {
     q: "How can I make a donation to OVA™?",
-    a: "You can make a donation by transferring funds to our SBI FCRA Account. Please follow the details provided in the Donor Details section on our website.",
+    a: "You can make a donation by transferring funds to our IDFC FIRST bank account. Please follow the bank details provided on this page and send the mandatory donor information to support@ova.ngo after your transfer.",
   },
   {
     q: "Can I donate anonymously?",
@@ -198,9 +198,9 @@ function Donate() {
     <>
       <SEO
         title={cmsSeo?.title || "Donate to Create Impact"}
-        description={cmsSeo?.description || "Donate to OVA™. 50-100% tax deduction under 80G. Feed children, sponsor education. SBI FCRA Account details."}
+        description={cmsSeo?.description || "Donate to OVA™. 50-100% tax deduction under 80G. Feed children, sponsor education. IDFC FIRST bank account details."}
         canonical="/donate"
-        keywords="donate OVA™, 80G tax exemption, NGO donation India, SBI FCRA, feed children"
+        keywords="donate OVA™, 80G tax exemption, NGO donation India, IDFC FIRST, feed children"
       />
 
       <div className="donate-page-wrap">
@@ -476,7 +476,7 @@ function Donate() {
                 <CmsHtml html={cmsData.bankBody} />
               ) : (
                 <>
-                  Transfer funds to our SBI FCRA Account using the details below. For 80G certificate, enter your PAN in the donation form and send the mandatory details to <a href="mailto:support@ova.ngo">support@ova.ngo</a> after your donation.
+                  Transfer funds to our IDFC FIRST account using the details below. For 80G certificate, enter your PAN in the donation form and send the mandatory details to <a href="mailto:support@ova.ngo">support@ova.ngo</a> after your donation.
                 </>
               )}
             </p>
@@ -496,23 +496,16 @@ function Donate() {
                   ))}
                 </ul>
               </div>
-              <div className="d-info-card d-info-card--notes">
-                <h3 className="d-bank-card-title">Important notes</h3>
-                <p>Anonymous donations are not accepted. No donation via debit/credit card is acceptable per RBI guidelines. After transferring, please send the mandatory details to our support email.</p>
-              </div>
             </div>
             <div className="d-card d-bank-table-card">
-              <h3 className="d-bank-card-title d-bank-table-title">OVA™ – State Bank of India</h3>
-              <div className="d-bank-row"><span className="d-bank-label">Account No.</span><span className="d-bank-value">43168261848</span></div>
-              <div className="d-bank-row"><span className="d-bank-label">IFSC</span><span className="d-bank-value">SBIN0015557</span></div>
-              <div className="d-bank-row"><span className="d-bank-label">Bank</span><span className="d-bank-value">State Bank of India (CSR Bank)</span></div>
-              <div className="d-bank-row" style={{ borderBottom: "none", marginBottom: "16px" }}><span className="d-bank-label">Branch</span><span className="d-bank-value">42 Airport Road, AT POST Vidyanagar, Kolhapur, Ujalaiwadi 416004</span></div>
-              <div className="d-table-wrap">
-                <table>
-                  <thead><tr><th>Sr.</th><th>Bank</th><th>Currency</th><th>SWIFT BIC</th><th>Account No.</th><th>Country</th></tr></thead>
-                  <tbody><tr><td>1</td><td>State Bank of India</td><td>RS</td><td>–</td><td>43168261848</td><td>India</td></tr></tbody>
-                </table>
-              </div>
+              <h3 className="d-bank-card-title d-bank-table-title">OVA™ – IDFC FIRST</h3>
+              <div className="d-bank-row"><span className="d-bank-label">Name</span><span className="d-bank-value">BHARATIYA OPEN VOLUNTEER ASSOCIATION</span></div>
+              <div className="d-bank-row"><span className="d-bank-label">Account No.</span><span className="d-bank-value">ova@idfcbank18</span></div>
+              <div className="d-bank-row"><span className="d-bank-label">IFSC</span><span className="d-bank-value">IDFB0042523</span></div>
+              <div className="d-bank-row"><span className="d-bank-label">SWIFT</span><span className="d-bank-value">IDFBINBBMUM</span></div>
+              <div className="d-bank-row"><span className="d-bank-label">Bank</span><span className="d-bank-value">IDFC FIRST</span></div>
+              <div className="d-bank-row"><span className="d-bank-label">Branch</span><span className="d-bank-value">KOLHAPUR BRANCH</span></div>
+              <div className="d-bank-row" style={{ borderBottom: "none" }}><span className="d-bank-label">VPA / UPI ID</span><span className="d-bank-value">ova@idfcbank</span></div>
             </div>
           </div>
         </section>
