@@ -44,41 +44,94 @@ function isNavCtaDuplicate(item) {
   return false;
 }
 
-function sanitizeNavItems(items) {
-  if (!Array.isArray(items)) return NAV_ITEMS;
-  return items
-    .filter((item) => item && !isNavCtaDuplicate(item))
-    .map((item) => {
-      if (item.type !== 'dropdown') return item;
-      const key = item.key || '';
-      const subs = Array.isArray(item.items) && item.items.length ? item.items : DROPDOWN_DEFAULTS[key];
-      return subs?.length ? { ...item, items: subs } : null;
-    })
-    .filter(Boolean);
+const NAV_LABEL_BY_PATH = {
+  '/': 'Home',
+  '/services': 'Services',
+  '/join': 'Join Us',
+  '/contact': 'Contact',
+};
+const NAV_LABEL_BY_KEY = {
+  about: 'About',
+  events: 'Events',
+};
+
+function normalizeNavItem(item) {
+  if (!item) return null;
+  if (item.type === 'dropdown' || Array.isArray(item.items)) {
+    const key =
+      item.key
+      || (String(item.label || '').toLowerCase() === 'about'
+        ? 'about'
+        : String(item.label || '').toLowerCase() === 'events'
+          ? 'events'
+          : '');
+    if (!key) return null;
+    const subs = Array.isArray(item.items) && item.items.length ? item.items : DROPDOWN_DEFAULTS[key];
+    if (!subs?.length) return null;
+    return {
+      ...item,
+      type: 'dropdown',
+      key,
+      label: NAV_LABEL_BY_KEY[key] || item.label,
+      items: subs,
+    };
+  }
+  const path = item.path || item.to || '/';
+  const label = NAV_LABEL_BY_PATH[path] || normalizeNavLabel(item.label);
+  return {
+    ...item,
+    type: 'link',
+    path,
+    label,
+  };
 }
 
-/* Transparent navbar (on hero) → ovalogo1; white navbar → ovalogo2. */
-function getLogoUrls(onHero, cmsGlobal = null) {
-  if (cmsGlobal && cmsGlobal.site_settings) {
-    const settings = cmsGlobal.site_settings;
-    if (onHero && settings.logo_secondary) {
-      const src = cmsImageUrl(settings.logo_secondary);
-      return { src, srcSet: undefined, sizes: undefined, fallback: src };
-    }
-    if (!onHero && settings.logo_primary) {
-      const src = cmsImageUrl(settings.logo_primary);
-      return { src, srcSet: undefined, sizes: undefined, fallback: src };
-    }
-  }
+function normalizeNavLabel(label) {
+  const key = String(label || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const aliases = {
+    'join us today': 'Join Us',
+    'join us now': 'Join Us',
+    'contact me': 'Contact',
+    'contact us': 'Contact',
+  };
+  return aliases[key] || label;
+}
 
+function sanitizeNavItems(items) {
+  if (!Array.isArray(items) || !items.length) return NAV_ITEMS;
+  const normalized = items
+    .filter((item) => item && !isNavCtaDuplicate(item))
+    .map((item) => normalizeNavItem(item))
+    .filter(Boolean);
+  return normalized.length ? normalized : NAV_ITEMS;
+}
+
+/** Static OVA logos in client/public/images (ovalogo1 on hero, ovalogo2 on inner pages). */
+function getLogoUrls(onHero) {
   const base = `${PUBLIC_URL}/images`;
   const name = onHero ? 'ovalogo1' : 'ovalogo2';
+  const webp90 = `${base}/${name}-90w.webp`;
+  const webp180 = `${base}/${name}-180w.webp`;
+  const png = `${base}/${name}.png`;
   return {
-    src: `${base}/${name}-90w.webp`,
-    srcSet: `${base}/${name}-90w.webp 90w, ${base}/${name}-180w.webp 180w`,
+    src: webp90,
+    srcSet: `${webp90} 90w, ${webp180} 180w`,
     sizes: '90px',
-    fallback: `${base}/${name}.png`,
+    fallbacks: [png, `${base}/ova-logo.png`, `${base}/logo.png`],
   };
+}
+
+function applyLogoFallback(e, fallbacks) {
+  const el = e.target;
+  const tried = Number(el.dataset.fallbackIdx || 0);
+  if (tried < fallbacks.length) {
+    el.dataset.fallbackIdx = String(tried + 1);
+    el.removeAttribute('srcset');
+    el.removeAttribute('sizes');
+    el.src = fallbacks[tried];
+    return;
+  }
+  el.onerror = null;
 }
 
 function Navbar() {
@@ -88,13 +141,11 @@ function Navbar() {
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT);
   const location = useLocation();
   const { global: cmsGlobal } = useCmsGlobal();
-  const navItems = useMemo(
-    () => sanitizeNavItems(cmsGlobal?.navItems?.length ? cmsGlobal.navItems : NAV_ITEMS),
-    [cmsGlobal?.navItems]
-  );
+  /* Canonical nav structure; CMS must not reorder or duplicate Connect/Donate links. */
+  const navItems = useMemo(() => sanitizeNavItems(NAV_ITEMS), []);
   const donateLabel = cmsGlobal?.donateLabel || 'Donate Now';
   const connectLabel = cmsGlobal?.connectLabel || 'OVA Connect';
-  const logoUrls = useMemo(() => getLogoUrls(onHero, cmsGlobal), [onHero, cmsGlobal]);
+  const logoUrls = useMemo(() => getLogoUrls(onHero), [onHero]);
 
   const isHome = location.pathname === '/';
   const isDonatePage = location.pathname === '/donate';
@@ -174,13 +225,7 @@ function Navbar() {
             width={90}
             height={90}
             decoding="async"
-            onError={(e) => {
-              const { fallback } = logoUrls;
-              if (fallback && !e.target.src.endsWith('.png') && !e.target.src.includes(fallback)) {
-                e.target.src = fallback;
-                e.target.onerror = null;
-              }
-            }}
+            onError={(e) => applyLogoFallback(e, logoUrls.fallbacks)}
           />
         </Link>
 
