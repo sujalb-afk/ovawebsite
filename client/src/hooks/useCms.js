@@ -3,8 +3,8 @@ import { normalizeSitePageData, normalizeCmsGlobal } from '../utils/cmsMappers';
 import { rewriteCmsMediaDeep } from '../utils/cmsMediaUrls';
 
 const apiBase = import.meta.env.VITE_API_URL || import.meta.env.REACT_APP_API_URL || '';
-/** Refetch so Publish updates sync to MongoDB and appear on the site */
-const CMS_REFETCH_MS = 15000;
+/** Refetch frequently so CMS publish updates appear quickly on the site. */
+const CMS_REFETCH_MS = 5000;
 
 let cmsEnabledConfirmed = false;
 

@@ -11,6 +11,19 @@ import { stripHtml, CmsHtml } from "../utils/cmsHtml";
 
 const apiBase = import.meta.env.VITE_API_URL || import.meta.env.REACT_APP_API_URL || '';
 
+function cleanCmsInlineText(value, fallback = '') {
+  const raw = typeof value === 'string' ? value : '';
+  const cleaned = stripHtml(
+    raw
+      .replace(/<!--\s*StartFragment\s*-->/gi, ' ')
+      .replace(/<!--\s*EndFragment\s*-->/gi, ' ')
+      .replace(/&nbsp;/gi, ' ')
+  )
+    .replace(/\s+/g, ' ')
+    .trim();
+  return cleaned || fallback;
+}
+
 const DONATE_FAQS = [
   {
     q: "How can I make a donation to OVA™?",
@@ -28,6 +41,14 @@ const DONATE_FAQS = [
 
 function Donate() {
   const { data: cmsData, seo: cmsSeo } = useCmsPage('donate');
+  const heroQuote = cleanCmsInlineText(
+    cmsData?.heroSubtext,
+    'We make a living by what we get. We make a life by what we give.'
+  );
+  const heroQuoteAuthor = cleanCmsInlineText(
+    cmsData?.heroQuoteAuthor,
+    'Winston Churchill'
+  );
   const taxContent = useMemo(
     () => mapCmsTaxCard(cmsData?.taxCard, taxinfo),
     [cmsData?.taxCard]
@@ -213,8 +234,8 @@ function Donate() {
               <p className="donate-hero-eyebrow">Every gift counts</p>
               <h1 className="about-hero-title">{cmsData?.heroHeading ? cmsData.heroHeading : <>Donate to<br /><em>Create Impact</em></>}</h1>
               <blockquote className="donate-hero-quote">
-                {cmsData?.heroSubtext ? stripHtml(cmsData.heroSubtext) : 'We make a living by what we get. We make a life by what we give.'}
-                <cite>, {cmsData?.heroQuoteAuthor || 'Winston Churchill'}</cite>
+                {heroQuote}
+                <cite>, {heroQuoteAuthor}</cite>
               </blockquote>
               <button type="button" onClick={scrollToDonateForm} className="donate-hero-cta">
                 {cmsData?.heroCtaLabel || 'Donate Now'}

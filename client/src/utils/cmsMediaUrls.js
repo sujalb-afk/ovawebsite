@@ -3,10 +3,18 @@
  */
 
 const KNOWN_HOST_PATTERNS = [/ngrok-free\.dev/i, /ngrok\.io/i, /localhost:5000/i];
+const CMS_MEDIA_REFRESH_PARAM = 'cms_refresh=1';
 
 function shouldRewriteHost(host) {
   if (!host) return false;
   return KNOWN_HOST_PATTERNS.some((re) => re.test(host));
+}
+
+function appendRefreshParam(pathWithSearch = '') {
+  if (!pathWithSearch) return pathWithSearch;
+  if (pathWithSearch.includes('cms_refresh=')) return pathWithSearch;
+  const joiner = pathWithSearch.includes('?') ? '&' : '?';
+  return `${pathWithSearch}${joiner}${CMS_MEDIA_REFRESH_PARAM}`;
 }
 
 export function rewriteCmsMediaUrl(url) {
@@ -14,7 +22,9 @@ export function rewriteCmsMediaUrl(url) {
   const t = url.trim();
   if (!t) return '';
 
-  if (t.startsWith('/uploads/') || t.startsWith('/images/')) return t;
+  if (t.startsWith('/uploads/') || t.startsWith('/images/')) {
+    return appendRefreshParam(t);
+  }
 
   if (!t.startsWith('http://') && !t.startsWith('https://')) return t;
 
@@ -22,7 +32,7 @@ export function rewriteCmsMediaUrl(url) {
     const u = new URL(t);
     if (!shouldRewriteHost(u.host)) return t;
     if (u.pathname.startsWith('/uploads/') || u.pathname.startsWith('/images/')) {
-      return `${u.pathname}${u.search}`;
+      return appendRefreshParam(`${u.pathname}${u.search}`);
     }
   } catch {
     /* ignore */

@@ -1554,61 +1554,60 @@ a {
     box-shadow 0.25s ease;
 }
 
-/* Pulse ring – GPU composited (transform + opacity only, no box-shadow animation) */
+/* Pulse ring – GPU composited (transform + opacity only) */
 .btn-nav-donate-updated::after,
 .btn-nav-connect-updated::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  border: 2px solid rgba(46, 168, 101, 0.55);
+  border: 2px solid rgba(255, 255, 255, 0.45);
   transform: scale(1);
-  opacity: 0.8;
-  animation: donatePulseRing 2.6s ease-in-out infinite;
+  opacity: 0.65;
+  animation: donatePulseRing 2.8s linear infinite;
   pointer-events: none;
   will-change: transform, opacity;
 }
-.btn-nav-donate-updated:hover::after,
-.btn-nav-donate-updated:active::after,
-.btn-nav-connect-updated:hover::after,
-.btn-nav-connect-updated:active::after {
-  animation: none;
-  opacity: 0;
-}
 
-/* Shimmer sweep overlay – use transform for GPU compositing (avoids layout) */
+/* Shimmer sweep – continuous linear loop */
 .btn-nav-donate-updated::before,
 .btn-nav-connect-updated::before {
   content: "";
   position: absolute;
-  top: 0;
+  top: -10%;
   left: 0;
-  width: 50%;
-  height: 100%;
+  width: 45%;
+  height: 120%;
   background: linear-gradient(
-    120deg,
+    105deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.28) 50%,
+    transparent 38%,
+    rgba(255, 255, 255, 0.22) 48%,
+    rgba(255, 255, 255, 0.38) 52%,
+    rgba(255, 255, 255, 0.22) 62%,
+    transparent 72%,
     transparent 100%
   );
-  transform: skewX(-15deg) translateX(-75%);
-  animation: donateShimmer 2.6s ease-in-out infinite;
+  transform: translate3d(-160%, 0, 0) skewX(-18deg);
+  animation: donateShimmer 3.2s linear infinite;
   pointer-events: none;
   will-change: transform;
 }
+.btn-nav-connect-updated::before {
+  animation-delay: -1.6s;
+}
 
 @keyframes donatePulseRing {
-  0%,
-  100% {
+  0% {
     transform: scale(1);
-    opacity: 0.8;
+    opacity: 0.6;
   }
-  50% {
-    transform: scale(1.15);
+  100% {
+    transform: scale(1.2);
     opacity: 0;
   }
 }
-/* Legacy name: GPU-friendly (no box-shadow) to avoid non-composited animation */
+/* Legacy name – used on other CTA buttons site-wide */
 @keyframes donatePulse {
   0%,
   100% {
@@ -1620,11 +1619,10 @@ a {
 }
 @keyframes donateShimmer {
   0% {
-    transform: skewX(-15deg) translateX(-75%);
+    transform: translate3d(-160%, 0, 0) skewX(-18deg);
   }
-  60%,
   100% {
-    transform: skewX(-15deg) translateX(125%);
+    transform: translate3d(260%, 0, 0) skewX(-18deg);
   }
 }
 
@@ -1632,15 +1630,10 @@ a {
 .btn-nav-connect-updated:hover {
   background: #2ea865;
   color: #fff;
-  transform: translateY(-3px) scale(1.05);
+  transform: translateY(-2px) scale(1.03);
   box-shadow:
     0 6px 20px rgba(26, 122, 74, 0.45),
     0 2px 6px rgba(0, 0, 0, 0.15);
-  animation: none;
-}
-.btn-nav-donate-updated:hover::before,
-.btn-nav-connect-updated:hover::before {
-  animation: none;
 }
 .btn-nav-donate-updated:active,
 .btn-nav-connect-updated:active {
@@ -2085,10 +2078,10 @@ a {
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    border: 2px solid rgba(46, 168, 101, 0.55);
+    border: 2px solid rgba(255, 255, 255, 0.45);
     transform: scale(1);
-    opacity: 0.8;
-    animation: donatePulseRing 2.6s ease-in-out infinite;
+    opacity: 0.65;
+    animation: donatePulseRing 2.8s linear infinite;
     pointer-events: none;
     will-change: transform, opacity;
   }
@@ -2096,39 +2089,36 @@ a {
   .btn-nav-connect-mobile::before {
     content: "";
     position: absolute;
-    top: 0;
+    top: -10%;
     left: 0;
-    width: 50%;
-    height: 100%;
+    width: 45%;
+    height: 120%;
     background: linear-gradient(
-      120deg,
+      105deg,
       transparent 0%,
-      rgba(255, 255, 255, 0.28) 50%,
+      transparent 38%,
+      rgba(255, 255, 255, 0.22) 48%,
+      rgba(255, 255, 255, 0.38) 52%,
+      rgba(255, 255, 255, 0.22) 62%,
+      transparent 72%,
       transparent 100%
     );
-    transform: skewX(-15deg) translateX(-75%);
-    animation: donateShimmer 2.6s ease-in-out infinite;
+    transform: translate3d(-160%, 0, 0) skewX(-18deg);
+    animation: donateShimmer 3.2s linear infinite;
     pointer-events: none;
     will-change: transform;
+  }
+  .btn-nav-connect-mobile::before {
+    animation-delay: -1.6s;
   }
   .btn-nav-donate-mobile:hover,
   .btn-nav-connect-mobile:hover {
     background: #2ea865;
     color: #fff;
-    transform: translateY(-3px) scale(1.05);
+    transform: translateY(-2px) scale(1.03);
     box-shadow:
       0 6px 20px rgba(26, 122, 74, 0.45),
       0 2px 6px rgba(0, 0, 0, 0.15);
-  }
-  .btn-nav-donate-mobile:hover::before,
-  .btn-nav-donate-mobile:hover::after,
-  .btn-nav-connect-mobile:hover::before,
-  .btn-nav-connect-mobile:hover::after {
-    animation: none;
-  }
-  .btn-nav-donate-mobile:hover::after,
-  .btn-nav-connect-mobile:hover::after {
-    opacity: 0;
   }
 
   /* Container: flex; toggler is positioned absolutely so it can never be hidden */
